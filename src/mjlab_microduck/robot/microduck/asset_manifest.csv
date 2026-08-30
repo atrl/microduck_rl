@@ -1,0 +1,48 @@
+file,category,subsystem,base_qty,roller_qty,role,notes
+ankle_l_v1.stl,print_candidate_rigid,roller,0,1,Roller left ankle,Roller model only
+ankle_left.stl,print_candidate_rigid,feet,1,0,Walking left ankle,Walking model only
+ankle_r_v1.stl,print_candidate_rigid,roller,0,1,Roller right ankle,Roller model only
+ankle_right.stl,print_candidate_rigid,feet,1,0,Walking right ankle,Walking model only
+banana_pcb_locker.stl,print_candidate_rigid,electronics_mounts,1,1,PCB retainer,
+bearing_roll.stl,print_candidate_rigid,hips,2,2,Hip bearing support,One per side
+bottom_head_shell.stl,print_candidate_rigid,head,1,1,Lower head shell,
+elec_rpi_robot_hat_pcb.stl,purchased_reference,electronics,1,1,Robot HAT PCB envelope,Reference geometry only
+face_part.stl,print_candidate_rigid,head,1,1,Face structure,
+foot_left.stl,print_candidate_rigid,feet,1,0,Walking left foot,Walking model only
+foot_right.stl,print_candidate_rigid,feet,1,0,Walking right foot,Walking model only
+hip_l.stl,print_candidate_rigid,hips,2,2,Hip structure,Same mesh used on both sides
+jaw.stl,print_candidate_rigid,head,1,1,Jaw structure,
+jaw_soft.stl,print_candidate_flexible,head,1,1,Soft lower mouth,Candidate for flexible material
+left_shell.stl,print_candidate_rigid,body,1,1,Left body shell,
+left_upper_leg.stl,legacy_unreferenced,legacy,0,0,Older upper-leg export,Not referenced by current base or roller MJCF
+leg.stl,print_candidate_rigid,legs,2,2,Lower leg,Same mesh used on both sides
+lens.stl,purchased_reference,electronics,1,1,Camera lens envelope,Reference geometry only
+m12_lens_holder.stl,print_candidate_rigid,electronics_mounts,1,1,M12 lens holder,
+motor_support.stl,print_candidate_rigid,head,1,1,Jaw motor support,
+neck.stl,print_candidate_rigid,neck,2,2,Neck side structure,Two instances
+neck_pitch.stl,print_candidate_rigid,neck,1,1,Neck pitch structure,
+noenoeil.stl,print_candidate_rigid,head,1,1,Eye-area cosmetic insert,
+np_f970.stl,purchased_reference,electronics,1,1,NP-F970 battery envelope,Reference geometry only
+pcb__raspberry_pi_zero_2_w.stl,purchased_reference,electronics,1,1,Raspberry Pi Zero 2 W envelope,Reference geometry only
+power_support.stl,print_candidate_rigid,electronics_mounts,1,1,Power and battery support,
+right_shell.stl,print_candidate_rigid,body,1,1,Right body shell,
+right_upper_leg.stl,legacy_unreferenced,legacy,0,0,Older upper-leg export,Not referenced by current base or roller MJCF
+rim.stl,print_candidate_rigid,roller,0,4,Wheel rim,Four wheels
+roller_blade.stl,print_candidate_rigid,roller,0,2,Roller chassis,One per foot
+seeed_bearing__configuration__22x16x4.stl,purchased_reference,mechanical,11,11,22 x 16 x 4 mm bearing envelope,Reference geometry only
+seeed_bearing__configuration_default.stl,purchased_reference,mechanical,3,3,15 x 15 x 3 mm bearing envelope,Reference geometry only
+soft_mouth_top.stl,print_candidate_flexible,head,1,1,Soft upper mouth,Candidate for flexible material
+sole_left.stl,print_candidate_flexible,feet,1,0,Walking left sole,Walking model only and candidate for flexible material
+sole_right.stl,print_candidate_flexible,feet,1,0,Walking right sole,Walking model only and candidate for flexible material
+speaker.stl,purchased_reference,electronics,1,1,Speaker envelope,Reference geometry only
+tire.stl,print_candidate_flexible,roller,0,4,Roller tire,Four wheels and candidate for flexible material
+top_head_shell.stl,print_candidate_rigid,head,1,1,Upper head shell,
+trunk_base.stl,print_candidate_rigid,body,1,1,Trunk base,
+trunk_shell_left.stl,legacy_unreferenced,legacy,0,0,Older trunk-shell export,Not referenced by current base or roller MJCF
+trunk_shell_right.stl,legacy_unreferenced,legacy,0,0,Older trunk-shell export,Not referenced by current base or roller MJCF
+upper_leg_left.stl,print_candidate_rigid,legs,1,1,Left upper leg,
+upper_leg_right.stl,print_candidate_rigid,legs,1,1,Right upper leg,
+upper_leg_rigidity_plate.stl,print_candidate_rigid,legs,2,2,Upper-leg rigidity plate,One per side
+xl330.stl,purchased_reference,mechanical,15,15,Dynamixel XL330 envelope,Reference geometry only
+yaw2roll.stl,print_candidate_rigid,hips,2,2,Hip yaw-to-roll bracket,One per side
+yaw_roll_motion.stl,print_candidate_rigid,neck,1,1,Head yaw-roll linkage,

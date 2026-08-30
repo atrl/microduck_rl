@@ -21,7 +21,9 @@ reward-design lessons that made it work
 
 ## Quickstart
 
-Requires a CUDA GPU (training runs through MuJoCo Warp) and [uv](https://docs.astral.sh/uv/).
+Requires [uv](https://docs.astral.sh/uv/). Training and `play` require a CUDA
+GPU because they run through MuJoCo Warp; the model-only CPU viewer below does
+not.
 
 > **On ARM boxes (DGX Spark / GB10, Jetson):** `uv sync` pulls ~2 GB of CUDA
 > wheels on first run and uv's default 30 s HTTP timeout can abort mid-download.
@@ -30,6 +32,16 @@ Requires a CUDA GPU (training runs through MuJoCo Warp) and [uv](https://docs.as
 ```bash
 git clone https://github.com/pollen-robotics/microduck_rl
 cd microduck_rl
+
+# one-time dependency setup; `uv run` also does this automatically
+uv sync
+
+# verify the task registry
+uv run list-envs
+
+# mandatory cheap smoke test before a long run
+uv run train Mjlab-Velocity-Flat-MicroDuck \
+    --env.scene.num-envs 64 --agent.max_iterations 5
 
 # train the walking policy (uses your GPU; ~1-2 h for a usable gait at 4096 envs)
 uv run train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 4096
@@ -43,6 +55,23 @@ uv run scripts/export.py Mjlab-Velocity-Flat-MicroDuck --wandb-run-path <...>
 # drive the exported policy in CPU MuJoCo with the keyboard
 uv run scripts/infer_policy.py --walking output.onnx
 ```
+
+To inspect the robot without a trained policy or a CUDA GPU, open one of the
+CPU MuJoCo scenes directly:
+
+```bash
+# walking feet
+uv run python -m mujoco.viewer \
+    --mjcf src/mjlab_microduck/robot/microduck/scene_walk.xml
+
+# roller feet
+uv run python -m mujoco.viewer \
+    --mjcf src/mjlab_microduck/robot/microduck/scene_rollers.xml
+```
+
+This viewer only displays and simulates the MJCF model; it does not run an RL
+policy. `uv run play ...` requires a trained W&B run, while
+`scripts/infer_policy.py` requires an exported ONNX file.
 
 Resume from a checkpoint:
 
@@ -131,6 +160,12 @@ one `config_mjcf_*.json` per model:
 
 `scene*.xml` files wrap the robots with a floor + keyframes (STAND/SIT/FOLD)
 for quick viewing and for `infer_policy.py`.
+
+The checked-in STL directory also contains purchased-part reference envelopes
+(servos, bearings, electronics, battery, lens, and speaker), plus rigid and
+flexible print candidates. See [docs/robot_assets.md](docs/robot_assets.md) for
+the complete classified manifest and the command that creates an organized
+copy without moving the meshes used by MuJoCo.
 
 <!-- IMAGE — side-by-side render: walk model vs rollers model (or a collision-geom
      visualization). One image here makes the model-variant story instant. -->
