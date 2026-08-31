@@ -1,0 +1,57 @@
+item_id,buy_status,preferred_url,alternate_url,link_type,link_checked_on,purchase_notes
+M031,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=16x22x4+bearing,,marketplace_search,2026-08-31,Confirm bearing construction seal and measured seat before ordering
+M032,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=10x15x3+bearing,,marketplace_search,2026-08-31,Inner diameter is approximate and must be measured first
+M036,do_not_buy,,,none,2026-08-31,Envelope exists but impedance power connector and acoustic requirements are unknown
+M045,ready_to_buy,https://en.robotis.com/shop_en/item.php?it_id=902-0163-000,https://www.robotis.us/dynamixel-xl330-m288-t/,manufacturer_shop,2026-08-31,Exact model; check regional stock and remember retail input is 3.7 to 6.0 V
+F001,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=M2x4+socket+head+screw,,marketplace_search,2026-08-31,Buy only after installed fastener schedule is dry-fit
+F002,inventory_included_first,https://en.robotis.com/shop_en/item.php?it_id=902-0163-000,https://www.aliexpress.com/wholesale?SearchText=M2x6+socket+head+screw,manufacturer_package,2026-08-31,Each XL330 package lists six M2x6 horn bolts; count included stock first
+F003,inventory_included_first,https://en.robotis.com/shop_en/item.php?it_id=902-0163-000,https://www.aliexpress.com/wholesale?SearchText=M2x8+socket+head+screw,manufacturer_package,2026-08-31,Each XL330 package lists ten M2x8 frame bolts; count included stock first
+F004,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=M2x12+socket+head+screw,,marketplace_search,2026-08-31,Length is inferred from mesh depth and needs dry-fit confirmation
+F005,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=M2+hex+nut,,marketplace_search,2026-08-31,Confirm where through-bolting is accessible
+F006,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=M2+heat+set+insert,,marketplace_search,2026-08-31,Select insert OD and length only after coupon testing
+F007,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=M2.5x6+socket+head+screw,,marketplace_search,2026-08-31,Use only where measured holes confirm M2.5
+F008,inventory_included_first,https://en.robotis.com/shop_en/item.php?it_id=902-0163-000,,manufacturer_package,2026-08-31,Confirm horn hardware included with every servo before buying separately
+F009,design_first,,,none,2026-08-31,Axle diameter material and retention are not fixed
+F010,design_first,,,none,2026-08-31,Spacer and washer stack depends on measured wheel side play
+F011,ready_to_buy,https://next.henkel-adhesives.com/us/en/products/industrial-adhesives/central-pdp.html/loctite-222/BP000340.html,,manufacturer_product,2026-08-31,Use only after confirming compatibility with printed polymer and inserts
+E001,ready_to_buy,https://radxa.com/products/zeros/zero3w/,https://docs.radxa.com/en/zero/zero3,manufacturer_buy,2026-08-31,Choose Wi-Fi 3W not Ethernet-only 3E and confirm RAM storage and header option
+E002,verify_before_buy,https://www.sandisk.com/products/memory-cards/microsd-cards/sandisk-high-endurance-uhs-i-microsd?capacity=32GB,https://docs.radxa.com/en/zero/zero3/download,manufacturer_product,2026-08-31,Use high-endurance storage only if the chosen Radxa SKU has no suitable eMMC
+E003,do_not_buy,,,none,2026-08-31,Official board is unavailable; replacement must be designed and fabricated
+E004,ready_to_buy,https://www.st.com/en/mems-and-sensors/lsm6dsv16x.html,https://www.digikey.com/en/products/filter/motion-sensors-imu-inertial-measurement-units/567?s=N4IgTCBcDaICoHsCmBLA9gOygAgIIIBdAvkA,manufacturer_sample_buy,2026-08-31,Use orderable LSM6DSV16XTR after package and assembly review
+E005,design_first,,,none,2026-08-31,MCU selection follows firmware timing and package requirements
+E006,design_first,,,none,2026-08-31,Select half-duplex circuit only after the one-servo interface prototype
+E007,design_first,,,none,2026-08-31,Do not order a PCB before schematic review ERC and DRC
+E008,do_not_buy,,,none,2026-08-31,Official HAT is not sold; replacement design is required
+E009,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=2x20+2.54mm+female+header,https://www.digikey.com/en/products/filter/headers-receptacles-female-sockets/315?s=N4IgjCBcoEwAwBYCcVQGMoDMCGAbAzgKYA0IA9lANogDMALAOxgC6xADgC5QgDKrATgJYA7AOYgAvkA,marketplace_search,2026-08-31,Stack height and through-hole orientation must match the mechanical design
+E010,design_first,,,none,2026-08-31,Do not select a host interface until automatic turnaround is proven at 1 Mbps
+E011,design_first,,,none,2026-08-31,Logic regulator selection depends on combined Radxa camera and sensor load test
+E012,design_first,,,none,2026-08-31,Servo regulator current rating is blocked on one-servo and five-servo measurements
+E013,verify_before_buy,https://www.smallrig.com/global/SmallRig-NP-F970-Camera-Battery-4073.html,https://www.smallrig.com/NP-F970-USB-C-Rechargeable-Camera-Battery.html,manufacturer_shop,2026-08-31,Confirm pack mass clearance protection behavior and selected NP-F size
+E014,verify_before_buy,https://www.aliexpress.com/wholesale?SearchText=NP-F970+battery+plate,,marketplace_search,2026-08-31,Confirm contact polarity retention and current rating
+E015,design_first,,,none,2026-08-31,Fuse type and rating require measured normal and fault current
+E016,design_first,,,none,2026-08-31,Switch voltage current and breaking rating require measured load
+E017,design_first,,,none,2026-08-31,Protection topology must be designed and fault-tested
+E018,design_first,,,none,2026-08-31,Capacitance voltage rating and ESR depend on scope captures
+E019,verify_before_buy,https://www.raspberrypi.com/products/camera-module-v2/,https://www.seeedstudio.com/Raspberry-Pi-Camera-Module-V2.html,manufacturer_and_reseller,2026-08-31,Confirm Radxa ribbon pinout and current runtime overlay before ordering
+E020,design_first,,,none,2026-08-31,Ribbon contact orientation pitch and routed length are unresolved
+E021,verify_before_buy,https://www.st.com/en/evaluation-tools/satel-vl53l8.html,https://estore.st.com/en/products/evaluation-tools-page61.html?marketing-status=Active&p=62,manufacturer_buy,2026-08-31,SATEL kit is for evaluation and may be too large; verify mechanical integration and driver compatibility
+E022,design_first,,,none,2026-08-31,Cable type and length depend on the selected ToF module
+E023,verify_before_buy,https://www.adafruit.com/product/3006,https://github.com/pollen-robotics/microduck/tree/main/deploy/audio,manufacturer_shop,2026-08-31,MAX98357A is only the output-only safe-replica option and does not provide microphone capture
+E024,design_first,,,none,2026-08-31,Microphone electrical acoustic and connector requirements are unresolved
+E025,inventory_included_first,https://en.robotis.com/shop_en/item.php?it_id=902-0163-000,https://www.digikey.com/en/product-highlight/j/jst/eh-series-connectors,manufacturer_package,2026-08-31,Each XL330 package includes one 180 mm X3P cable; measure routing before making custom lengths
+E026,verify_before_buy,https://www.digikey.com/en/products/detail/jst-sales-america-inc/EHR-3/527225,,authorized_distributor,2026-08-31,Buy only for custom cable lengths after the harness drawing is frozen
+E027,verify_before_buy,https://www.digikey.com/en/products/detail/jst-sales-america-inc/SEH-001T-P0-6/26213194,https://www.digikey.com/en/product-highlight/j/jst/eh-series-connectors,authorized_distributor,2026-08-31,Verify wire gauge and crimp tooling before ordering production quantity
+E028,design_first,,,none,2026-08-31,Wire gauge insulation flexibility colors and total length remain open
+E029,choose_local,,,commodity,2026-08-31,Choose a known data-capable USB-C cable and verify maskrom flashing
+E030,inventory_included_first,https://radxa.com/products/zeros/zero3w/,,manufacturer_product,2026-08-31,Zero 3W has onboard wireless; confirm selected antenna SKU before buying anything else
+C001,design_first,,,none,2026-08-31,Select rigid material only after strength creep and insert coupons
+C002,design_first,,,none,2026-08-31,Select TPU shore hardness only after friction and tear coupons
+C003,choose_local,,,commodity,2026-08-31,Any dimensionally stable low-cost filament is acceptable for fit prototypes
+T001,ready_to_buy,https://www.robotis.us/u2d2/,https://emanual.robotis.com/docs/en/parts/interface/u2d2/,manufacturer_shop,2026-08-31,Exact official adapter for single-servo ID and baud configuration
+T002,choose_local,,,tool_category,2026-08-31,Choose a current-limited supply with logging after expected range is fixed
+T003,choose_local,,,tool_category,2026-08-31,Choose a reputable meter with continuity and protected current measurement
+T004,choose_local,,,tool_category,2026-08-31,Choose at least two channels and enough bandwidth for 1 Mbps TTL edges
+T005,verify_before_buy,https://media.digikey.com/pdf/Data%20Sheets/JST%20PDFs/Crimping_Tools_Machines.pdf,,manufacturer_tooling_reference,2026-08-31,JST lists YC-260R or equivalent tooling for SEH-001T-P0.6; verify source and cost
+T006,choose_local,,,tool_category,2026-08-31,Choose temperature-controlled soldering and hot-air tools appropriate for the selected packages
+T007,choose_local,,,tool_category,2026-08-31,Choose a calibrated 0.01 mm display caliper from a reputable local supplier
+T008,design_first,,,none,2026-08-31,Stand geometry depends on final robot mass envelope and emergency access

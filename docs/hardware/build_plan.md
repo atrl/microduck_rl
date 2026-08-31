@@ -1,8 +1,10 @@
 # Safe replica build plan
 
-The authoritative task tracker is [`work_plan.csv`](work_plan.csv). This page
-defines the phase gates and execution rules used to decide whether those tasks
-may advance.
+The authoritative task tracker is [`work_plan.csv`](work_plan.csv). The master
+BOM is split into [`print_bom.csv`](print_bom.csv),
+[`purchase_bom.csv`](purchase_bom.csv), and
+[`reference_bom.csv`](reference_bom.csv) for execution. This page defines the
+phase gates and rules used to decide whether those tasks may advance.
 
 ## Outcome
 

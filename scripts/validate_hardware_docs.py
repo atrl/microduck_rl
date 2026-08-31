@@ -5,12 +5,17 @@ from __future__ import annotations
 
 import csv
 import sys
+from datetime import date
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 HARDWARE_DIR = REPO_ROOT / "docs/hardware"
 BOM_PATH = HARDWARE_DIR / "microduck_bom.csv"
 PLAN_PATH = HARDWARE_DIR / "work_plan.csv"
+PURCHASE_LINKS_PATH = HARDWARE_DIR / "purchase_links.csv"
+PRINT_BOM_PATH = HARDWARE_DIR / "print_bom.csv"
+PURCHASE_BOM_PATH = HARDWARE_DIR / "purchase_bom.csv"
+REFERENCE_BOM_PATH = HARDWARE_DIR / "reference_bom.csv"
 ASSET_MANIFEST_PATH = (
     REPO_ROOT / "src/mjlab_microduck/robot/microduck/asset_manifest.csv"
 )
@@ -68,6 +73,26 @@ PROCUREMENT_CLASSES = {
 CONFIDENCE_LEVELS = {"high", "medium", "low"}
 PLAN_STATUSES = {"pending", "in_progress", "blocked", "complete"}
 PRIORITIES = {"P0", "P1", "P2"}
+PRINT_CLASSES = {"print_rigid", "print_flexible"}
+PURCHASE_CLASSES = {"purchase", "custom_board", "fabricate", "consumable", "tooling"}
+REFERENCE_CLASSES = {"reference_only", "legacy"}
+BUY_STATUSES = {
+    "ready_to_buy",
+    "verify_before_buy",
+    "inventory_included_first",
+    "design_first",
+    "do_not_buy",
+    "choose_local",
+}
+PURCHASE_LINK_FIELDS = (
+    "item_id",
+    "buy_status",
+    "preferred_url",
+    "alternate_url",
+    "link_type",
+    "link_checked_on",
+    "purchase_notes",
+)
 
 
 def _read_csv(path: Path, expected_fields: tuple[str, ...]) -> list[dict[str, str]]:
@@ -105,7 +130,7 @@ def _validate_quantity(
         errors.append(f"{row_name}: {field} must be non-negative")
 
 
-def validate_bom() -> tuple[int, int]:
+def validate_bom() -> tuple[int, int, dict[str, int]]:
     rows = _read_csv(BOM_PATH, BOM_FIELDS)
     asset_rows = _read_csv(
         ASSET_MANIFEST_PATH,
@@ -179,9 +204,91 @@ def validate_bom() -> tuple[int, int]:
                     f"{source_asset}"
                 )
 
+    link_rows = _read_csv(PURCHASE_LINKS_PATH, PURCHASE_LINK_FIELDS)
+    link_ids = [row["item_id"] for row in link_rows]
+    if duplicates := _duplicates(link_ids):
+        errors.append(f"duplicate purchase-link item ids: {duplicates}")
+    expected_purchase_ids = {
+        row["item_id"] for row in rows if row["procurement_class"] in PURCHASE_CLASSES
+    }
+    actual_purchase_ids = set(link_ids)
+    if missing := expected_purchase_ids - actual_purchase_ids:
+        errors.append(f"purchase links missing BOM items: {sorted(missing)}")
+    if extra := actual_purchase_ids - expected_purchase_ids:
+        errors.append(f"purchase links contain non-purchase items: {sorted(extra)}")
+
+    for row in link_rows:
+        item_id = row["item_id"]
+        buy_status = row["buy_status"]
+        if buy_status not in BUY_STATUSES:
+            errors.append(f"{item_id}: unknown buy_status {buy_status!r}")
+        for field in ("preferred_url", "alternate_url"):
+            if row[field] and not row[field].startswith("https://"):
+                errors.append(f"{item_id}: {field} must be an https URL")
+        if (
+            buy_status
+            in {
+                "ready_to_buy",
+                "verify_before_buy",
+                "inventory_included_first",
+            }
+            and not row["preferred_url"]
+        ):
+            errors.append(f"{item_id}: {buy_status} requires preferred_url")
+        if buy_status in {"design_first", "do_not_buy"} and row["preferred_url"]:
+            errors.append(f"{item_id}: {buy_status} must not include a purchase URL")
+        if not row["purchase_notes"]:
+            errors.append(f"{item_id}: purchase_notes is required")
+        try:
+            date.fromisoformat(row["link_checked_on"])
+        except ValueError:
+            errors.append(f"{item_id}: link_checked_on must be an ISO date")
+
+    view_paths = {
+        "print": PRINT_BOM_PATH,
+        "purchase": PURCHASE_BOM_PATH,
+        "reference": REFERENCE_BOM_PATH,
+    }
+    view_ids: dict[str, set[str]] = {}
+    for name, path in view_paths.items():
+        with path.open(newline="", encoding="utf-8") as handle:
+            view_ids[name] = {row["item_id"] for row in csv.DictReader(handle)}
+    expected_view_ids = {
+        "print": {
+            row["item_id"] for row in rows if row["procurement_class"] in PRINT_CLASSES
+        },
+        "purchase": expected_purchase_ids,
+        "reference": {
+            row["item_id"]
+            for row in rows
+            if row["procurement_class"] in REFERENCE_CLASSES
+        },
+    }
+    for name, expected in expected_view_ids.items():
+        if view_ids[name] != expected:
+            errors.append(
+                f"{name} BOM view ids disagree with master: "
+                f"missing={sorted(expected - view_ids[name])} "
+                f"extra={sorted(view_ids[name] - expected)}"
+            )
+    combined = set().union(*view_ids.values())
+    if combined != set(item_ids):
+        errors.append("split BOM views do not cover every master BOM item")
+    names = list(view_ids)
+    for index, left in enumerate(names):
+        for right in names[index + 1 :]:
+            if overlap := view_ids[left] & view_ids[right]:
+                errors.append(
+                    f"split BOM views {left} and {right} overlap: {sorted(overlap)}"
+                )
+
     if errors:
         raise ValueError("Hardware BOM validation failed:\n- " + "\n- ".join(errors))
-    return len(rows), len(expected_assets)
+    return (
+        len(rows),
+        len(expected_assets),
+        {name: len(ids) for name, ids in view_ids.items()},
+    )
 
 
 def validate_plan() -> int:
@@ -249,14 +356,14 @@ def validate_plan() -> int:
 
 def main() -> int:
     try:
-        bom_rows, asset_count = validate_bom()
+        bom_rows, asset_count, view_counts = validate_bom()
         plan_rows = validate_plan()
     except (OSError, ValueError) as exc:
         print(exc, file=sys.stderr)
         return 1
     print(
         f"Validated {bom_rows} BOM rows covering {asset_count} STL assets and "
-        f"{plan_rows} work-plan tasks."
+        f"{plan_rows} work-plan tasks; split views={view_counts}."
     )
     return 0
 

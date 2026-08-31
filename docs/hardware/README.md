@@ -21,7 +21,13 @@ or fabricated safely without a measurement or prototype test.
 
 - [`microduck_bom.csv`](microduck_bom.csv): printable parts, purchased parts,
   boards, harness, fasteners, materials, tools, quantities, confidence, sources,
-  and verification gates.
+  and verification gates. This remains the canonical master.
+- [`print_bom.csv`](print_bom.csv): only rigid and flexible print candidates,
+  including direct local paths to each STL.
+- [`purchase_bom.csv`](purchase_bom.csv): purchased, fabricated, board,
+  consumable, and tooling items with buy status and product/search links.
+- [`reference_bom.csv`](reference_bom.csv): reference-only and legacy meshes
+  that should not enter a print or purchase order.
 - [`assembly_and_wiring.md`](assembly_and_wiring.md): provisional assembly and
   wiring sequence with hard stop conditions.
 - [`build_plan.md`](build_plan.md): phase gates and execution rules.
@@ -63,3 +69,21 @@ retraining.
 The third-party fastener and exploded-view reconstruction is useful secondary
 evidence but is not endorsed by Pollen Robotics:
 <https://github.com/fanhao375/microduck-replica>.
+
+## Purchase status
+
+The purchase view is intentionally not a one-click cart:
+
+- `ready_to_buy`: exact part or product family is fixed; still verify regional
+  stock and delivery.
+- `verify_before_buy`: a useful link exists but a fit, revision, or interface
+  measurement must pass first.
+- `inventory_included_first`: first count parts bundled with another purchase.
+- `design_first`: electrical or mechanical design work must finish before a
+  part can be selected.
+- `do_not_buy`: the item is unavailable, obsolete, or too underspecified.
+- `choose_local`: generic commodity or tool; select a reputable local source.
+
+As of 2026-08-31 the purchase view has 56 rows: 5 `ready_to_buy`, 17
+`verify_before_buy`, 5 `inventory_included_first`, 19 `design_first`, 3
+`do_not_buy`, and 7 `choose_local`. Twenty-seven rows include a preferred link.
