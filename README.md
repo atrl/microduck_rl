@@ -167,6 +167,12 @@ flexible print candidates. See [docs/robot_assets.md](docs/robot_assets.md) for
 the complete classified manifest and the command that creates an organized
 copy without moving the meshes used by MuJoCo.
 
+Hardware reconstruction is tracked separately in
+[docs/hardware/README.md](docs/hardware/README.md). It includes a source-labeled
+complete BOM, provisional assembly and wiring guide, safety gates, and the full
+task/dependency plan required to turn the simulation assets into a validated
+safe replica. It is not an official production BOM or manufacturing release.
+
 <!-- IMAGE — side-by-side render: walk model vs rollers model (or a collision-geom
      visualization). One image here makes the model-variant story instant. -->
 

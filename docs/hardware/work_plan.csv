@@ -1,0 +1,81 @@
+task_id,phase,task,depends_on,status,priority,deliverable,exit_criteria,evidence_required,notes
+P0-01,0_scope,Freeze safe-replica-v0 target,,pending,P0,Decision record,Target specifies walking or roller first build and safe regulated servo rail,Reviewed decision,Exact official electrical clone is out of scope without schematics
+P0-02,0_scope,Inventory hardware already owned,P0-01,pending,P0,Inventory delta,Every owned component has model revision quantity and condition,Photos and part labels,
+P0-03,0_scope,Create electrical and mechanical risk register,P0-01,pending,P0,Risk register,Each high risk has mitigation owner and verification gate,Reviewed risk table,Include battery servo overvoltage and moving-joint hazards
+E0-01,1_evidence,Inventory all 47 simulation assets,,complete,P0,asset_manifest.csv,Every checked-in STL is classified,Automated manifest test,Completed by commit 49faa81
+E0-02,1_evidence,Recover current mechanical kinematic tree,E0-01,complete,P0,Mechanical chain map,All 14 policy joints plus mouth actuator are mapped,MJCF and runtime source references,
+E0-03,1_evidence,Recover current bus IDs and protocol,,complete,P0,Bus contract,IDs 10-14 20-24 30-34 and 200 plus 1 Mbps are recorded,Official runtime source references,
+E0-04,1_evidence,Obtain physical reference measurements,P0-02,blocked,P0,Measurement sheet,Critical interfaces are measured from a real unit or official engineering files,Photos caliper readings and revision identity,Needs physical robot or official CAD access
+M1-01,2_mechanical,Import assembly into editable CAD,E0-01,pending,P0,Editable CAD assembly,All current parts appear in correct transforms,CAD screenshots and source-to-part map,
+M1-02,2_mechanical,Repair simulation meshes for manufacturing,M1-01,pending,P0,Watertight manufacturing candidates,Every printed part passes mesh and wall-thickness checks,Mesh QA report,Do not overwrite original simulation meshes
+M1-03,2_mechanical,Dimension all critical interfaces,M1-01,pending,P0,Interface control drawing,Bearing seats servo mounts shafts shells and PCB mounts are dimensioned,Dimension audit,E0-04 may replace inference with measurements
+M1-04,2_mechanical,Design M2 and bearing fit coupons,M1-03,pending,P0,Coupon STL set,Coupons cover printer material and orientation combinations,Drawing and slicer records,
+M1-05,2_mechanical,Print and measure fit coupons,M1-04,pending,P0,Fit calibration table,Chosen hole insert and bearing offsets pass repeated assembly,Caliper data photos and pull tests,
+M1-06,2_mechanical,Finalize fastener stack by location,M1-05,pending,P0,Installed fastener schedule,Every joint and shell screw has exact type length and retention,Annotated assembly and dry-fit evidence,Replaces inferred stock quantities
+M1-07,2_mechanical,Design servo zeroing jigs,M1-03,pending,P0,Zeroing jig STLs,Every actuator can be installed at documented spline orientation,Jig repeatability test,Missing official horn-zero documentation
+M1-08,2_mechanical,Design cable routes and strain relief,M1-03,pending,P0,Harness route drawing,Full joint travel causes no pinch rub or connector load,Motion video and clearance review,
+M1-09,2_mechanical,Validate walking foot assembly,M1-05|M1-06,pending,P1,Walking foot prototype,Both feet assemble and meet flatness and friction targets,Photos dimensions and load test,
+M1-10,2_mechanical,Validate roller foot assembly,M1-05|M1-06,pending,P2,Roller prototype,Four wheels spin freely with bounded side play,Spin-down and load test,Optional until walking build passes
+M1-11,2_mechanical,Run full digital clearance review,M1-07|M1-08|M1-09,pending,P0,Clearance report,No collisions through commanded joint ranges,CAD interference report,
+P1-01,3_power,Measure one XL330 current and transient behavior,P0-01,pending,P0,Single-servo power trace,Rated-voltage current heat and transient data are recorded,Scope logs current logs and temperature,
+P1-02,3_power,Measure five-servo leg load,P1-01,pending,P0,Leg power trace,Representative synchronized loads are recorded without brownout,Scope logs and temperature,
+P1-03,3_power,Select safe servo regulator,P1-02,pending,P0,Regulator decision,Output stays at or below 6 V and survives measured transients,Load-step thermal and fault tests,Existing policy must be retrained for selected voltage
+P1-04,3_power,Select 5 V logic regulator,P0-02,pending,P0,Logic power decision,Radxa camera audio and sensors pass load-step test,Scope logs and thermal test,
+P1-05,3_power,Design fuse reverse-polarity and inrush protection,P1-03|P1-04,pending,P0,Protected input schematic,Faults do not damage battery loads or operator,Fault-injection evidence,
+P1-06,3_power,Review power architecture,P1-05,pending,P0,Signed review checklist,Independent review closes all P0 electrical risks,Reviewer comments and resolved actions,
+P1-07,3_power,Bench-test complete power tree,P1-06,pending,P0,Power prototype,Logic and servo rails remain stable under combined dummy loads,Scope logs thermals and shutdown test,
+B1-01,4_bus,Choose half-duplex TTL circuit,P1-04,pending,P0,Bus-interface schematic,Circuit works without an unimplemented direction GPIO,ROBOTIS reference comparison and review,
+B1-02,4_bus,Prototype one-servo bus,B1-01,pending,P0,Bus breadboard,One XL330 communicates reliably at 1 Mbps,Packet error count and scope capture,
+B1-03,4_bus,Configure all servo IDs,B1-02|P0-02,pending,P0,Servo identity record,Each servo has unique target ID and label,Before-after scan logs,Configure one servo at a time
+B1-04,4_bus,Build measured cable set,M1-08|B1-02,pending,P0,Tagged cable harness,Every cable passes polarity continuity resistance and pull tests,Harness test sheet,
+B1-05,4_bus,Stress-test 15-servo bus,B1-03|B1-04|P1-07,pending,P0,Bus stress report,All servo blocks read and targets write at 50 Hz without collisions,Error counters and scope captures,IMU board may be simulated for this step
+I1-01,5_imu,Freeze imu_to_dxl register contract,E0-03,pending,P0,Firmware interface spec,ID200 register124 12-byte block and timing are unambiguous,Source-linked review,
+I1-02,5_imu,Select IMU-board MCU and electrical parts,I1-01|B1-01,pending,P0,Board BOM,All parts have lifecycle package and source,Reviewed BOM,
+I1-03,5_imu,Design imu_to_dxl schematic and PCB,I1-02,pending,P0,KiCad project,ERC DRC and independent review pass,ERC DRC fabrication plots and review,
+I1-04,5_imu,Implement Dynamixel V2 slave firmware,I1-01|I1-02,pending,P0,Firmware project,Board answers sync-read at ID200 and exposes diagnostics,Protocol tests and captured packets,
+I1-05,5_imu,Implement LSM6DSV16X SFLP path,I1-04,pending,P0,Sensor firmware,Quaternion gyro scale freshness and startup behavior match runtime,Reference-motion comparison,
+I1-06,5_imu,Bring up imu_to_dxl prototypes,I1-03|I1-05,pending,P0,Three tested boards,Boards pass power protocol sensor and thermal tests,Bring-up logs and serial numbers,
+I1-07,5_imu,Run full 16-device timing test,I1-06|B1-05,pending,P0,Full-bus timing report,50 Hz loop meets deadline with fresh IMU samples,Loop logs error counters and scope captures,
+H1-01,6_hat,Freeze replacement HAT requirements,P0-01|P1-06|B1-01,pending,P0,HAT requirements,Power bus compute peripheral and connector contracts are explicit,Reviewed requirements,
+H1-02,6_hat,Decide full audio codec or output-only audio,H1-01,pending,P1,Audio decision,Required playback and capture features are explicit,Decision and acceptance tests,
+H1-03,6_hat,Design HAT schematic and PCB,H1-02|P1-07,pending,P0,KiCad project,ERC DRC mechanical fit and independent review pass,Review checklist and fabrication outputs,
+H1-04,6_hat,Bring up HAT power and UART,H1-03,pending,P0,Powered prototype,Radxa boots and one-servo bus is stable,Voltage scope and bus logs,
+H1-05,6_hat,Bring up ToF interface,H1-04,pending,P1,ToF test report,VL53L8CX streams stable 8x8 data at 15 Hz,Service logs and range targets,
+H1-06,6_hat,Bring up audio path,H1-04,pending,P2,Audio test report,Playback and selected microphone path meet acceptance criteria,Frequency sweep noise and recording,
+V1-01,7_vision,Validate IMX219 camera and cable,P0-02|H1-04,pending,P1,Camera test report,1080p30 capture and required rotation work with head motion,Video sample thermal and cable-motion test,
+A1-01,8_assembly,Print final rigid parts,M1-11,pending,P0,Inspected rigid part set,Every part matches final revision and dimensions,Print logs and inspection sheet,
+A1-02,8_assembly,Print final flexible parts,M1-05,pending,P1,Inspected flexible part set,Mouth soles and optional tires pass material tests,Print logs and material tests,
+A1-03,8_assembly,Prepare final fastener kit,M1-06,pending,P0,Labeled fastener kit,Every assembly step has its hardware bag,Kit reconciliation,
+A1-04,8_assembly,Assemble and test left leg,A1-01|A1-03|B1-04,pending,P0,Left-leg subassembly,Manual travel is smooth and harness is unstrained,Photos torque record and motion test,
+A1-05,8_assembly,Assemble and test right leg,A1-01|A1-03|B1-04,pending,P0,Right-leg subassembly,Manual travel is smooth and harness is unstrained,Photos torque record and motion test,
+A1-06,8_assembly,Assemble neck head and mouth,A1-01|A1-02|A1-03|B1-04,pending,P0,Head subassembly,All five actuators sensors and cables pass full motion,Photos and functional tests,
+A1-07,8_assembly,Assemble trunk power and compute,A1-01|H1-04|P1-07,pending,P0,Trunk subassembly,Battery is retained and service disconnect is accessible,Photos continuity and retention tests,
+A1-08,8_assembly,Complete harness and continuity audit,A1-04|A1-05|A1-06|A1-07,pending,P0,Harness audit,Every connector matches net and polarity with no shorts,Signed continuity matrix,No battery connected during audit
+A1-09,8_assembly,Close shells and complete mechanical assembly,A1-08,pending,P0,Complete unpowered robot,Shells close without pinching and all joints move manually,Photo set and final fastener reconciliation,
+S1-01,9_software,Provision Radxa Zero 3W,P0-02,pending,P0,Provisioned system,Supported Armbian boots with network and storage checks,Provision log,
+S1-02,9_software,Enable UART I2C camera and NPU overlays,S1-01,pending,P0,Board configuration,ttyS2 I2C camera and optional NPU devices appear,Device inventory and reboot evidence,
+S1-03,9_software,Install official microduck runtime,S1-02,pending,P0,Installed runtime,All services start with motor power disabled,Version and service logs,
+S1-04,9_software,Run no-torque health check,S1-03|A1-09,pending,P0,Initial health report,Expected degradation is explained and no unsafe output occurs,robotctl health JSON,
+S1-05,9_software,Power full bus with torque disabled,S1-04|I1-07|P1-07,pending,P0,Full device scan,All 16 IDs respond with plausible voltage and temperature,Scan log and thermal baseline,
+S1-06,9_software,Validate home offsets on suspended stand,S1-05|M1-07,pending,P0,Calibration record,Commanded home aligns every mechanical joint without load,Joint telemetry photos and current logs,
+S1-07,9_software,Test init relax and emergency disconnect,S1-06,pending,P0,Safety operation report,Init ramps safely and both relax and hard disconnect stop motion,Video logs and checklist,
+R1-01,10_retraining,Identify actuator behavior at selected voltage,P1-03|S1-07,pending,P0,Actuator identification dataset,Static friction step and loaded response are measured,Raw logs and fitted comparison,
+R1-02,10_retraining,Update BAM calibration for safe replica,R1-01,pending,P0,Calibrated actuator config,Simulation reproduces measured single-joint responses,Overlay plots and test thresholds,
+R1-03,10_retraining,Define non-accumulating domain randomization,R1-02,pending,P0,Safe-replica environment config,Voltage friction delay bias and mass ranges are evidence-based,Config review and invariant tests,
+R1-04,10_retraining,Run mandatory 64-env five-iteration smoke test,R1-03,pending,P0,Smoke-test run,Build steps rewards and ONNX export are NaN-free,Logs and exported ONNX,
+R1-05,10_retraining,Train walking policy,R1-04,pending,P0,Walking checkpoint,Task reward and gait metrics meet predefined gates,WandB run and evaluation battery,
+R1-06,10_retraining,Export normalized ONNX,R1-05,pending,P0,Deployment ONNX,Normalizer is baked and interface is 61-to-14,Exporter log and shape check,
+R1-07,10_retraining,Run CPU deployment rehearsal,R1-06,pending,P0,Inference rehearsal report,Keyboard commands and joint slots match runtime,CSV and recorded rollout,
+V2-01,11_sim2real,Run suspended low-gain motion test,R1-07|S1-07,pending,P0,Suspended motion report,All joint directions ranges and telemetry match model,Video current temperature and joint logs,
+V2-02,11_sim2real,Run supported stand test,V2-01,pending,P0,Stand report,Robot holds home without saturation overheating or brownout,Current temperature and tilt logs,
+V2-03,11_sim2real,Run tethered low-speed walking test,V2-02,pending,P0,Walking transfer report,Robot tracks low commands within safety thresholds,Video and synchronized telemetry,
+V2-04,11_sim2real,Compare sim and real traces,V2-03,pending,P0,Sim2real comparison,Major position velocity current and tilt residuals are explained,Aligned plots and issue list,
+V2-05,11_sim2real,Iterate calibration and policy,V2-04,pending,P0,Accepted walking policy,Predefined transfer and safety gates pass,Final evaluation battery,Repeat without weakening gates
+V2-06,11_sim2real,Validate fall and recovery behavior,V2-05,pending,P1,Fall-recovery report,Controlled tests show safe limp landing and recovery,Video impacts currents and temperatures,
+V2-07,11_sim2real,Validate roller hardware and policy,M1-10|V2-05,pending,P2,Roller report,Roller assembly and policy pass handling and thermal gates,Video and telemetry,Optional second configuration
+D1-01,12_release,Replace inferred BOM quantities with installed counts,A1-09,pending,P0,Release BOM,Every installed part and spare is reconciled,Physical count and signed audit,
+D1-02,12_release,Publish photo-based assembly manual,A1-09|S1-07,pending,P0,Assembly manual,Another builder can reproduce all subassemblies and checks,Independent dry-run feedback,
+D1-03,12_release,Publish schematics PCB and firmware,I1-07|H1-06,pending,P0,Open hardware release,Source fabrication files licenses and revisions are complete,Fresh-clone build and fabrication checks,
+D1-04,12_release,Publish calibration and test fixtures,V2-05,pending,P0,Calibration package,Fresh environment reproduces calibration results,Reproduction log,
+D1-05,12_release,Publish safety and bring-up checklist,S1-07|V2-06,pending,P0,Safety guide,Power torque fall thermal and emergency procedures are explicit,Independent review,
+D1-06,12_release,Tag immutable safe-replica release,D1-01|D1-02|D1-03|D1-04|D1-05,pending,P0,Versioned release,All artifacts point to one tested hardware and software revision,Release manifest and hashes,

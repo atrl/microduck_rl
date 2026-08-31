@@ -49,9 +49,11 @@ part names and assembly roles; they are not slicer profiles.
 
 `purchased_reference` is intentionally included in the bundle. It contains the
 visual/collision envelopes for 15 Dynamixel XL330 servos, eleven 22 x 16 x 4 mm
-bearings, three 15 x 15 x 3 mm bearings, the Robot HAT PCB, Raspberry Pi Zero 2
-W, NP-F970 battery, camera lens, and speaker. These files help with fit and
-clearance checks; they are not printable replacements for the purchased parts.
+bearings, three approximately 10 x 15 x 3 mm bearings (ID x OD x thickness), the
+Robot HAT PCB, Raspberry Pi Zero 2 W, NP-F970 battery, camera lens, and speaker.
+These files help with fit and clearance checks; they are not printable
+replacements for the purchased parts. The complete reconstruction BOM and its
+evidence labels are in [hardware/microduck_bom.csv](hardware/microduck_bom.csv).
 
 `legacy_unreferenced` contains four older shell/upper-leg exports that neither
 current assembly declares. Keeping them separate prevents accidental printing
