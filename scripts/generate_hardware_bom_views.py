@@ -12,7 +12,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 HARDWARE_DIR = REPO_ROOT / "docs/hardware"
 MASTER_PATH = HARDWARE_DIR / "microduck_bom.csv"
-LINKS_PATH = HARDWARE_DIR / "purchase_links.csv"
 
 PRINT_PATH = HARDWARE_DIR / "print_bom.csv"
 PURCHASE_PATH = HARDWARE_DIR / "purchase_bom.csv"
@@ -58,6 +57,7 @@ PURCHASE_FIELDS = (
     "alternate_url",
     "link_type",
     "link_checked_on",
+    "next_action",
     "verification_gate",
     "source_url",
     "purchase_notes",
@@ -95,7 +95,6 @@ def _render(rows: list[dict[str, str]], fields: tuple[str, ...]) -> str:
 
 def generate() -> dict[Path, str]:
     master = _read(MASTER_PATH)
-    links = {row["item_id"]: row for row in _read(LINKS_PATH)}
     print_rows: list[dict[str, str]] = []
     purchase_rows: list[dict[str, str]] = []
     reference_rows: list[dict[str, str]] = []
@@ -109,9 +108,7 @@ def generate() -> dict[Path, str]:
             )
             print_rows.append(printable)
         elif procurement_class in PURCHASE_CLASSES:
-            merged = dict(row)
-            merged.update(links.get(row["item_id"], {}))
-            purchase_rows.append(merged)
+            purchase_rows.append(row)
         elif procurement_class in REFERENCE_CLASSES:
             reference_rows.append(row)
         else:

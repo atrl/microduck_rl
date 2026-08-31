@@ -84,6 +84,12 @@ The purchase view is intentionally not a one-click cart:
 - `do_not_buy`: the item is unavailable, obsolete, or too underspecified.
 - `choose_local`: generic commodity or tool; select a reputable local source.
 
+Rows without a purchase URL are retained rather than guessed. Their
+`next_action` says how to close the gap: finish design and measurements first,
+confirm an alternative, count bundled inventory, or freeze acceptance criteria
+for local sourcing. Purchase metadata lives directly in the master BOM; there
+is no separate link sidecar to keep synchronized.
+
 As of 2026-08-31 the purchase view has 56 rows: 5 `ready_to_buy`, 17
 `verify_before_buy`, 5 `inventory_included_first`, 19 `design_first`, 3
 `do_not_buy`, and 7 `choose_local`. Twenty-seven rows include a preferred link.

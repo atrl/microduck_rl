@@ -12,7 +12,6 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 HARDWARE_DIR = REPO_ROOT / "docs/hardware"
 BOM_PATH = HARDWARE_DIR / "microduck_bom.csv"
 PLAN_PATH = HARDWARE_DIR / "work_plan.csv"
-PURCHASE_LINKS_PATH = HARDWARE_DIR / "purchase_links.csv"
 PRINT_BOM_PATH = HARDWARE_DIR / "print_bom.csv"
 PURCHASE_BOM_PATH = HARDWARE_DIR / "purchase_bom.csv"
 REFERENCE_BOM_PATH = HARDWARE_DIR / "reference_bom.csv"
@@ -37,6 +36,13 @@ BOM_FIELDS = (
     "verification_gate",
     "source_url",
     "notes",
+    "buy_status",
+    "preferred_url",
+    "alternate_url",
+    "link_type",
+    "link_checked_on",
+    "next_action",
+    "purchase_notes",
 )
 PLAN_FIELDS = (
     "task_id",
@@ -84,15 +90,6 @@ BUY_STATUSES = {
     "do_not_buy",
     "choose_local",
 }
-PURCHASE_LINK_FIELDS = (
-    "item_id",
-    "buy_status",
-    "preferred_url",
-    "alternate_url",
-    "link_type",
-    "link_checked_on",
-    "purchase_notes",
-)
 
 
 def _read_csv(path: Path, expected_fields: tuple[str, ...]) -> list[dict[str, str]]:
@@ -204,21 +201,27 @@ def validate_bom() -> tuple[int, int, dict[str, int]]:
                     f"{source_asset}"
                 )
 
-    link_rows = _read_csv(PURCHASE_LINKS_PATH, PURCHASE_LINK_FIELDS)
-    link_ids = [row["item_id"] for row in link_rows]
-    if duplicates := _duplicates(link_ids):
-        errors.append(f"duplicate purchase-link item ids: {duplicates}")
     expected_purchase_ids = {
         row["item_id"] for row in rows if row["procurement_class"] in PURCHASE_CLASSES
     }
-    actual_purchase_ids = set(link_ids)
-    if missing := expected_purchase_ids - actual_purchase_ids:
-        errors.append(f"purchase links missing BOM items: {sorted(missing)}")
-    if extra := actual_purchase_ids - expected_purchase_ids:
-        errors.append(f"purchase links contain non-purchase items: {sorted(extra)}")
-
-    for row in link_rows:
+    purchasing_fields = (
+        "buy_status",
+        "preferred_url",
+        "alternate_url",
+        "link_type",
+        "link_checked_on",
+        "next_action",
+        "purchase_notes",
+    )
+    for row in rows:
         item_id = row["item_id"]
+        if item_id not in expected_purchase_ids:
+            populated = [field for field in purchasing_fields if row[field]]
+            if populated:
+                errors.append(
+                    f"{item_id}: non-purchase item has purchasing fields {populated}"
+                )
+            continue
         buy_status = row["buy_status"]
         if buy_status not in BUY_STATUSES:
             errors.append(f"{item_id}: unknown buy_status {buy_status!r}")
@@ -237,8 +240,8 @@ def validate_bom() -> tuple[int, int, dict[str, int]]:
             errors.append(f"{item_id}: {buy_status} requires preferred_url")
         if buy_status in {"design_first", "do_not_buy"} and row["preferred_url"]:
             errors.append(f"{item_id}: {buy_status} must not include a purchase URL")
-        if not row["purchase_notes"]:
-            errors.append(f"{item_id}: purchase_notes is required")
+        if not row["purchase_notes"] or not row["next_action"]:
+            errors.append(f"{item_id}: purchase_notes and next_action are required")
         try:
             date.fromisoformat(row["link_checked_on"])
         except ValueError:
