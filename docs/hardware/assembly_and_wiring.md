@@ -185,6 +185,13 @@ DATA without a reviewed interface.
   act as a Dynamixel Protocol 2.0 slave at ID200 and serve the runtime's register
   block.
 
+The reviewed v0 replacement-board contract and board-level BOM are in
+[`imu_to_dxl_v0_design.md`](imu_to_dxl_v0_design.md) and
+[`imu_to_dxl_v0_bom.csv`](imu_to_dxl_v0_bom.csv). The private JLCEDA schematic
+is a prototype artifact only. Do not convert it to a manufacturing order until
+the measured board outline, mounting holes, sensor-axis orientation, independent
+review, and one-servo power/bus gates in that document pass.
+
 ## 6. Harness audit before power
 
 Create a continuity matrix containing every connector and both endpoints. With

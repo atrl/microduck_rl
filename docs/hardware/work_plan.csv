@@ -29,9 +29,9 @@ B1-02,4_bus,Prototype one-servo bus,B1-01,pending,P0,Bus breadboard,One XL330 co
 B1-03,4_bus,Configure all servo IDs,B1-02|P0-02,pending,P0,Servo identity record,Each servo has unique target ID and label,Before-after scan logs,Configure one servo at a time
 B1-04,4_bus,Build measured cable set,M1-08|B1-02,pending,P0,Tagged cable harness,Every cable passes polarity continuity resistance and pull tests,Harness test sheet,
 B1-05,4_bus,Stress-test 15-servo bus,B1-03|B1-04|P1-07,pending,P0,Bus stress report,All servo blocks read and targets write at 50 Hz without collisions,Error counters and scope captures,IMU board may be simulated for this step
-I1-01,5_imu,Freeze imu_to_dxl register contract,E0-03,pending,P0,Firmware interface spec,ID200 register124 12-byte block and timing are unambiguous,Source-linked review,
-I1-02,5_imu,Select IMU-board MCU and electrical parts,I1-01|B1-01,pending,P0,Board BOM,All parts have lifecycle package and source,Reviewed BOM,
-I1-03,5_imu,Design imu_to_dxl schematic and PCB,I1-02,pending,P0,KiCad project,ERC DRC and independent review pass,ERC DRC fabrication plots and review,
+I1-01,5_imu,Freeze imu_to_dxl register contract,E0-03,complete,P0,Firmware interface spec,ID200 register124 12-byte block and timing are unambiguous,Source-linked review,Contract frozen in imu_to_dxl_v0_design.md from current official runtime
+I1-02,5_imu,Select IMU-board MCU and electrical parts,I1-01|B1-01,complete,P0,Board BOM,All parts have lifecycle package and source,Reviewed BOM,Exact active parts and JLC identifiers recorded in imu_to_dxl_v0_bom.csv
+I1-03,5_imu,Design imu_to_dxl schematic and PCB,I1-02,in_progress,P0,Editable JLCEDA project and reviewed PCB,ERC DRC mechanical fit and independent review pass,DRC netlist PCB fabrication plots and review,Schematic DRC and netlist pass; PCB blocked on measured outline holes orientation and independent review
 I1-04,5_imu,Implement Dynamixel V2 slave firmware,I1-01|I1-02,pending,P0,Firmware project,Board answers sync-read at ID200 and exposes diagnostics,Protocol tests and captured packets,
 I1-05,5_imu,Implement LSM6DSV16X SFLP path,I1-04,pending,P0,Sensor firmware,Quaternion gyro scale freshness and startup behavior match runtime,Reference-motion comparison,
 I1-06,5_imu,Bring up imu_to_dxl prototypes,I1-03|I1-05,pending,P0,Three tested boards,Boards pass power protocol sensor and thermal tests,Bring-up logs and serial numbers,

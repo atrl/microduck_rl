@@ -32,6 +32,12 @@ or fabricated safely without a measurement or prototype test.
   wiring sequence with hard stop conditions.
 - [`build_plan.md`](build_plan.md): phase gates and execution rules.
 - [`work_plan.csv`](work_plan.csv): task-level dependency and evidence tracker.
+- [`imu_to_dxl_v0_design.md`](imu_to_dxl_v0_design.md): source-backed ID200
+  replacement-board contract, schematic decisions, and verification gates.
+- [`imu_to_dxl_v0_bom.csv`](imu_to_dxl_v0_bom.csv): board-level prototype BOM
+  with JLC/LCSC identifiers and DNP decisions.
+- [`imu_to_dxl_v0_bringup.md`](imu_to_dxl_v0_bringup.md): PCB, firmware,
+  inspection, power, one-servo, and full-bus completion gates.
 - [`../robot_assets.md`](../robot_assets.md): original simulation-asset package.
 
 ## Design target
@@ -90,6 +96,6 @@ confirm an alternative, count bundled inventory, or freeze acceptance criteria
 for local sourcing. Purchase metadata lives directly in the master BOM; there
 is no separate link sidecar to keep synchronized.
 
-As of 2026-08-31 the purchase view has 56 rows: 5 `ready_to_buy`, 17
-`verify_before_buy`, 5 `inventory_included_first`, 19 `design_first`, 3
-`do_not_buy`, and 7 `choose_local`. Twenty-seven rows include a preferred link.
+As of 2026-09-01 the purchase view has 63 rows: 5 `ready_to_buy`, 23
+`verify_before_buy`, 5 `inventory_included_first`, 20 `design_first`, 3
+`do_not_buy`, and 7 `choose_local`. Thirty-three rows include a preferred link.

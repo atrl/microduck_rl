@@ -15,6 +15,7 @@ PLAN_PATH = HARDWARE_DIR / "work_plan.csv"
 PRINT_BOM_PATH = HARDWARE_DIR / "print_bom.csv"
 PURCHASE_BOM_PATH = HARDWARE_DIR / "purchase_bom.csv"
 REFERENCE_BOM_PATH = HARDWARE_DIR / "reference_bom.csv"
+IMU_BOARD_BOM_PATH = HARDWARE_DIR / "imu_to_dxl_v0_bom.csv"
 ASSET_MANIFEST_PATH = (
     REPO_ROOT / "src/mjlab_microduck/robot/microduck/asset_manifest.csv"
 )
@@ -56,6 +57,22 @@ PLAN_FIELDS = (
     "evidence_required",
     "notes",
 )
+IMU_BOARD_BOM_FIELDS = (
+    "refdes",
+    "quantity",
+    "function",
+    "manufacturer_part",
+    "manufacturer",
+    "package",
+    "lcsc_id",
+    "jlc_device_uuid",
+    "jlc_library_uuid",
+    "assembly_status",
+    "evidence_status",
+    "source_url",
+    "verification_gate",
+    "notes",
+)
 BOM_STATUSES = {
     "confirmed_model",
     "confirmed_runtime",
@@ -89,6 +106,15 @@ BUY_STATUSES = {
     "design_first",
     "do_not_buy",
     "choose_local",
+}
+IMU_BOARD_ASSEMBLY_STATUSES = {
+    "populate",
+    "populate_0R_then_tune",
+    "populate_then_measure",
+    "prototype_only",
+    "dnp_until_review",
+    "dnp_until_measurement",
+    "fabricate",
 }
 
 
@@ -357,16 +383,73 @@ def validate_plan() -> int:
     return len(rows)
 
 
+def validate_imu_board_bom() -> int:
+    rows = _read_csv(IMU_BOARD_BOM_PATH, IMU_BOARD_BOM_FIELDS)
+    errors: list[str] = []
+    refdes_values = [row["refdes"] for row in rows]
+    if duplicates := _duplicates(refdes_values):
+        errors.append(f"duplicate imu board BOM refdes groups: {duplicates}")
+
+    for row in rows:
+        refdes = row["refdes"] or "<empty>"
+        try:
+            quantity = int(row["quantity"])
+            if quantity <= 0:
+                errors.append(f"{refdes}: quantity must be positive")
+        except ValueError:
+            errors.append(f"{refdes}: quantity={row['quantity']!r} is not an integer")
+
+        for field in (
+            "refdes",
+            "function",
+            "manufacturer_part",
+            "package",
+            "assembly_status",
+            "evidence_status",
+            "verification_gate",
+        ):
+            if not row[field]:
+                errors.append(f"{refdes}: {field} is required")
+        if row["assembly_status"] not in IMU_BOARD_ASSEMBLY_STATUSES:
+            errors.append(
+                f"{refdes}: unknown assembly_status {row['assembly_status']!r}"
+            )
+        if row["evidence_status"] not in BOM_STATUSES:
+            errors.append(
+                f"{refdes}: unknown evidence_status {row['evidence_status']!r}"
+            )
+        if row["source_url"] and not row["source_url"].startswith("https://"):
+            errors.append(f"{refdes}: source_url must be an https URL")
+
+        jlc_fields = (
+            row["lcsc_id"],
+            row["jlc_device_uuid"],
+            row["jlc_library_uuid"],
+        )
+        if any(jlc_fields) and not all(jlc_fields):
+            errors.append(
+                f"{refdes}: LCSC id and both JLC UUID fields must be populated together"
+            )
+
+    if errors:
+        raise ValueError(
+            "IMU board BOM validation failed:\n- " + "\n- ".join(errors)
+        )
+    return len(rows)
+
+
 def main() -> int:
     try:
         bom_rows, asset_count, view_counts = validate_bom()
         plan_rows = validate_plan()
+        imu_board_bom_rows = validate_imu_board_bom()
     except (OSError, ValueError) as exc:
         print(exc, file=sys.stderr)
         return 1
     print(
         f"Validated {bom_rows} BOM rows covering {asset_count} STL assets and "
-        f"{plan_rows} work-plan tasks; split views={view_counts}."
+        f"{plan_rows} work-plan tasks plus {imu_board_bom_rows} imu board BOM rows; "
+        f"split views={view_counts}."
     )
     return 0
 

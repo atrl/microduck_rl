@@ -17,6 +17,7 @@ def test_hardware_bom_and_work_plan_are_consistent() -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "covering 47 STL assets" in result.stdout
+    assert "17 imu board BOM rows" in result.stdout
 
 
 def test_split_hardware_bom_views_are_current() -> None:
