@@ -115,6 +115,8 @@ IMU_BOARD_ASSEMBLY_STATUSES = {
     "dnp_until_review",
     "dnp_until_measurement",
     "fabricate",
+    "hand_solder_after_smt",
+    "dnp_bench_v0_1",
 }
 
 

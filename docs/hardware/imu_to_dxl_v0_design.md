@@ -1,6 +1,6 @@
-# `imu_to_dxl` safe-replica v0 design
+# `imu_to_dxl` safe-replica v0.1 design
 
-Status: **prototype schematic / not approved for manufacture**
+Status: **bench prototype order package ready / final robot fit not approved**
 
 This document freezes a reproducible replacement for the unpublished
 `imu_to_dxl` v2 board used by the current Microduck runtime. It does not claim
@@ -32,7 +32,7 @@ must not be assigned a guessed meaning in v0.
 ## Selected architecture
 
 ```text
-J1/J2 JST EH bus pass-through
+J1 JST EH bus input; J2 footprint DNP on bench v0.1
   pin 1 GND ─────────────────────────────────────────────── GND
   pin 2 DXL_VDD (3.7–6.0 V; 5.0 V recommended) ── U4 ─── 3V3
   pin 3 DXL_DATA ── U3 ROBOTIS-reference half duplex ───── USART1
@@ -42,7 +42,7 @@ J1/J2 JST EH bus pass-through
          ├─ SPI1 ── U2 LSM6DSV16XTR
          ├─ INT1 ── U2 INT1
          ├─ USART1 TX/RX + GPIO direction ── U3
-         ├─ 8 MHz HSE crystal
+         ├─ HSI16 internal clock; baud measured and tuned in bring-up
          └─ SWD header + reset/test points
 ```
 
@@ -54,11 +54,11 @@ J1/J2 JST EH bus pass-through
 | U2 | LSM6DSV16XTR | exact runtime sensor; SFLP quaternion; SPI modes 0/3; VDD 1.71–3.6 V | `C5267406`, UUID `df91102e0558458ea6697768cf7c49bb` |
 | U3 | SN74LVC2G241DCTR | exact topology class in the ROBOTIS 3.3 V TTL reference circuit; complementary enables provide receive/transmit steering | `C2676069`, UUID `fd706ee9f5e94b91833cadb369e166b1` |
 | U4 | LP2985-33DBVR | 3.3 V, 150 mA LDO, 2.5–16 V input and low dropout; preserves margin at the XL330 minimum rail | `C95414`, UUID `fbb1d5eb191a4646aa282b0c9bd9afc6` |
-| J1/J2 | JST B3B-EH-A(LF)(SN) | exact XL330 mating-family PCB header, pins GND/VDD/DATA | `C160259`, UUID `c8e6f5be2cdb4d1fb379fcd625589b0c` |
-| Y1 | NDK NX3225GD-8MHZ-STD-CRA-3 | external timebase for repeatable 1 Mbps timing; 8 MHz, 8 pF load | `C889706`, UUID `b3a54ecd979846b3bffdaed0d36ab1b7` |
+| J1/J2 | JST B3B-EH-A(LF)(SN) | exact XL330 mating-family PCB header, pins GND/VDD/DATA; populate J1 only | `C160259`, UUID `c8e6f5be2cdb4d1fb379fcd625589b0c` |
+| J3 | HCTL PZ127-2-05-S | orderable 2x5 1.27 mm SMT SWD header | `C3975188`, UUID `72524cb4eb6742dc93f30d3f1de759b8` |
 
 Stock observations are a dated sourcing snapshot, not a purchase order. On
-2026-09-01 the LCSC pages showed stock for U1–U4, J1/J2 and Y1. Stock and exact
+2026-09-01 the LCSC/JLC pages showed stock for U1–U4, J1/J2 and J3. Stock and exact
 revision must be rechecked immediately before ordering.
 
 ## Schematic rules
@@ -84,7 +84,8 @@ no direction GPIO.
 
 ### Power
 
-- J1 and J2 pass DXL_VDD directly; the board never supplies servo current.
+- Bench v0.1 is an end node. Populate J1 only; J2, D1 and D2 are DNP. Do not
+  use the narrow board traces to pass servo current to a downstream device.
 - The board operating input is the retail XL330 rail, 3.7–6.0 V, with 5.0 V
   recommended by ROBOTIS. It must not be connected to an unregulated 2S pack.
 - U4 input: 1 µF X7R plus 10 µF local bulk; output: 4.7 µF X7R plus 100 nF.
@@ -99,7 +100,7 @@ no direction GPIO.
 
 | U1 signal | Pin/function | Net |
 |---|---|---|
-| PF0 / PF1 | HSE oscillator | Y1 and two 12 pF C0G load capacitors |
+| PF0 / PF1 | unused | NC; configure as analog inputs |
 | PA4 | SPI1_NSS | IMU_CS |
 | PA5 | SPI1_SCK | IMU_SCK |
 | PA6 | SPI1_MISO | IMU_MISO |
@@ -113,6 +114,11 @@ no direction GPIO.
 
 All unused GPIOs remain unconnected in the schematic and are configured as
 analog inputs in firmware. VBAT is tied to 3V3 because v0 has no backup supply.
+Bench v0.1 uses the STM32 HSI16 oscillator. At room temperature the datasheet
+specifies 15.88–16.08 MHz at 3.0 V, while temperature and voltage add further
+drift. Firmware must measure UART timing at 3.7/5.0/6.0 V and tune/calibrate or
+reject the board if the 1 Mbps error budget is not met; visual UART success is
+not sufficient.
 
 ### IMU mode and mounting
 
@@ -145,45 +151,60 @@ analog inputs in firmware. VBAT is tied to 3V3 because v0 has no backup supply.
 
 ## Verification gates
 
-The current schematic is suitable only for review. Fabrication remains blocked
-until all of the following are complete:
+Fabrication is split into two scopes so missing robot measurements do not block
+electrical learning:
+
+- **Bench prototype v0.1:** may be ordered using the archived manufacturing
+  package. It has no mounting holes, is not a servo-power pass-through and is
+  not approved for installation in the robot.
+- **Robot-fit release:** remains blocked until the trunk envelope, mounting
+  points, cable exits and required IMU axes are physically measured and the
+  resulting PCB receives an independent mechanical/electrical review.
+
+After fabrication, the prototype must still pass the following gates before it
+can touch the full robot bus:
 
 1. Independent pin-number and footprint audit against every manufacturer
    datasheet and the JLC library objects.
-2. Electrical-rule check with no unexplained errors.
-3. Board outline, mounting holes and IMU orientation measured from the target
-   trunk, not inferred from a screenshot.
-4. One-servo bus test at 1 Mbps with TX-enable timing, idle voltage, overshoot,
-   ringing and packet-error captures.
-5. 3.7 V / 5.0 V / 6.0 V input tests, brownout and hot-plug tests using a
+2. Unpowered continuity and DNP inspection, including the J3 solder-mask risk.
+3. One-servo bus test at 1 Mbps with TX-enable timing, idle voltage, overshoot,
+   ringing, measured UART bit timing and packet-error captures.
+4. 3.7 V / 5.0 V / 6.0 V input tests, brownout and hot-plug tests using a
    current-limited supply; no direct unregulated 2S connection.
-6. Reference-motion test for gyro scale, quaternion axes, startup validity and
+5. Reference-motion test for gyro scale, quaternion axes, startup validity and
    stale-sample behavior.
-7. Full sixteen-device 50 Hz timing test before installation in the robot.
+6. Full sixteen-device 50 Hz timing test before installation in the robot.
 
 ## Current JLCEDA artifact and review result
 
-The private JLCEDA project `Microduck-imu_to_dxl-prototype` currently contains
-the v0 P1 schematic. The 2026-09-01 review snapshot contains 28 BOM components
-and 18 named nets. A fresh strict DRC completed with zero errors and zero
-warnings, and the generated netlist was checked pin-by-pin for 3V3, GND,
-DXL_VDD, DXL_DATA, both transceiver-side nets, UART, SPI, HSE, reset and SWD.
-The captured schematic is available as
+The private JLCEDA project `Microduck-imu_to_dxl-prototype` contains schematic
+page `c54e91c5cd2c5ac7` and PCB `7dfe558c7d961755` in project
+`643d2ed0f25f403394217692a93e032c`. The v0.1 PCB is 45.009 x 24.994 mm,
+2-layer, 1.6 mm FR-4 with 1 oz copper and no mounting holes. A fresh PCB DRC
+completed 124 checks with zero issues at 2026-09-01 22:39:30. The captured
+schematic is available as
 [`imu_to_dxl_v0_schematic.png`](imu_to_dxl_v0_schematic.png).
 
-This result clears schematic construction only. It does not clear fabrication.
-Two JLC library details remain explicit audit items:
+The dated Gerber, JLCEDA BOM and CPL exports are archived in
+[`manufacturing/`](manufacturing/). JLC online DFM task `DFMP2609010916`
+parsed the board as 2 layers and 4.5 x 2.5 cm, with 0.24 mm minimum line width,
+0.20 mm minimum spacing, 0.30 mm minimum drill and 0.15 mm minimum annular
+ring. It reported two 1.85 mm through-hole-to-SMD clearance red items around
+J1/J2 and one 0.05 mm solder-mask-opening-to-trace red item near J3. These are
+accepted only for the bench build with J2/D1/D2 DNP, J1 hand soldering,
+production-file review and post-assembly microscope inspection. They are not
+accepted as a final robot-fit release.
 
-- Y1 is a physical two-terminal NDK crystal but the current library symbol calls
-  terminal 2 `GND`; the netlist correctly connects it to `HSE_OUT`. Confirm the
-  two-pad footprint and manufacturer drawing before PCB conversion.
-- U4 library pin 3 is displayed as `ON/OFF#`, while the TI LP2985 datasheet
-  defines the enable behavior. It is intentionally tied to DXL_VDD; verify the
-  symbol pin number and active level against the exact orderable revision.
+The JLC web order checker accepts the Gerber and shows a five-board quote. On
+2026-09-01 the web-order price was CNY 40; the DFM estimator showed CNY 20 and
+an unreconciled SMT estimate of CNY 211.81. Prices and stock are volatile.
+Final submission/payment remains a user action after checking shipping, tax,
+DNP reconciliation and the generated production preview.
 
-The DRC also reports informational empty `Value` properties on some active
-devices. These are not electrical errors; supplier part numbers and footprints
-remain populated in the generated netlist.
+One JLC library item remains an explicit audit item: U4 library pin 3 is
+displayed as `ON/OFF#`, while the TI datasheet defines the enable behavior. It
+is intentionally tied to DXL_VDD; verify pin number and active level against
+the exact orderable revision before power-up.
 
 ## Primary sources
 

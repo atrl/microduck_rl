@@ -38,6 +38,8 @@ or fabricated safely without a measurement or prototype test.
   with JLC/LCSC identifiers and DNP decisions.
 - [`imu_to_dxl_v0_bringup.md`](imu_to_dxl_v0_bringup.md): PCB, firmware,
   inspection, power, one-servo, and full-bus completion gates.
+- [`manufacturing/`](manufacturing/): hashed v0.1 Gerber, JLCEDA BOM/CPL and
+  the mandatory DNP/DFM order checklist.
 - [`../robot_assets.md`](../robot_assets.md): original simulation-asset package.
 
 ## Design target
@@ -57,8 +59,10 @@ retraining.
 - Servo bus protocol and IDs: confirmed by official runtime.
 - Power distribution: design required; **do not connect a 2S pack directly to
   retail XL330 servos from this documentation**.
-- Robot HAT and `imu_to_dxl`: interface contracts available; official schematic
-  and firmware unavailable; replacements must be designed and tested.
+- Robot HAT: interface contract available; replacement design still required.
+- `imu_to_dxl`: bench v0.1 PCB is orderable from the archived package after
+  D1/D2/J2 DNP reconciliation; firmware, electrical bring-up and final robot
+  mechanical fit remain open.
 - Full assembly: blocked until the P0 gates in `build_plan.md` pass.
 
 ## Primary sources
@@ -96,6 +100,6 @@ confirm an alternative, count bundled inventory, or freeze acceptance criteria
 for local sourcing. Purchase metadata lives directly in the master BOM; there
 is no separate link sidecar to keep synchronized.
 
-As of 2026-09-01 the purchase view has 63 rows: 5 `ready_to_buy`, 23
-`verify_before_buy`, 5 `inventory_included_first`, 20 `design_first`, 3
-`do_not_buy`, and 7 `choose_local`. Thirty-three rows include a preferred link.
+As of 2026-09-01 the purchase view has 62 rows: 6 `ready_to_buy`, 24
+`verify_before_buy`, 5 `inventory_included_first`, 18 `design_first`, 2
+`do_not_buy`, and 7 `choose_local`. Thirty-five rows include a preferred link.
