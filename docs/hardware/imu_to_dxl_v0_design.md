@@ -1,4 +1,4 @@
-# `imu_to_dxl` safe-replica v0.1 design
+# `imu_to_dxl` safe-replica v0.2 design
 
 Status: **bench prototype order package ready / final robot fit not approved**
 
@@ -32,7 +32,7 @@ must not be assigned a guessed meaning in v0.
 ## Selected architecture
 
 ```text
-J1 JST EH bus input; J2 footprint DNP on bench v0.1
+J1 JST EH bus input; v0.2 is a single-connector end node
   pin 1 GND ─────────────────────────────────────────────── GND
   pin 2 DXL_VDD (3.7–6.0 V; 5.0 V recommended) ── U4 ─── 3V3
   pin 3 DXL_DATA ── U3 ROBOTIS-reference half duplex ───── USART1
@@ -42,7 +42,7 @@ J1 JST EH bus input; J2 footprint DNP on bench v0.1
          ├─ SPI1 ── U2 LSM6DSV16XTR
          ├─ INT1 ── U2 INT1
          ├─ USART1 TX/RX + GPIO direction ── U3
-         ├─ HSI16 internal clock; baud measured and tuned in bring-up
+         ├─ HSI16 internal clock + USART automatic baud detection
          └─ SWD header + reset/test points
 ```
 
@@ -54,11 +54,11 @@ J1 JST EH bus input; J2 footprint DNP on bench v0.1
 | U2 | LSM6DSV16XTR | exact runtime sensor; SFLP quaternion; SPI modes 0/3; VDD 1.71–3.6 V | `C5267406`, UUID `df91102e0558458ea6697768cf7c49bb` |
 | U3 | SN74LVC2G241DCTR | exact topology class in the ROBOTIS 3.3 V TTL reference circuit; complementary enables provide receive/transmit steering | `C2676069`, UUID `fd706ee9f5e94b91833cadb369e166b1` |
 | U4 | LP2985-33DBVR | 3.3 V, 150 mA LDO, 2.5–16 V input and low dropout; preserves margin at the XL330 minimum rail | `C95414`, UUID `fbb1d5eb191a4646aa282b0c9bd9afc6` |
-| J1/J2 | JST B3B-EH-A(LF)(SN) | exact XL330 mating-family PCB header, pins GND/VDD/DATA; populate J1 only | `C160259`, UUID `c8e6f5be2cdb4d1fb379fcd625589b0c` |
+| J1 | JST B3B-EH-A(LF)(SN) | exact XL330 mating-family PCB header, pins GND/VDD/DATA; hand-solder after SMT | `C160259`, UUID `c8e6f5be2cdb4d1fb379fcd625589b0c` |
 | J3 | HCTL PZ127-2-05-S | orderable 2x5 1.27 mm SMT SWD header | `C3975188`, UUID `72524cb4eb6742dc93f30d3f1de759b8` |
 
 Stock observations are a dated sourcing snapshot, not a purchase order. On
-2026-09-01 the LCSC/JLC pages showed stock for U1–U4, J1/J2 and J3. Stock and exact
+2026-09-01 the LCSC/JLC pages showed stock for U1–U4, J1 and J3. Stock and exact
 revision must be rechecked immediately before ordering.
 
 ## Schematic rules
@@ -75,8 +75,9 @@ Use the ROBOTIS XL330 reference topology around U3:
   ROBOTIS reference.
 - Place 33 Ω series resistors at the U3 bus-facing pins as tuning footprints;
   begin with 0 Ω/33 Ω only after one-servo scope captures.
-- Add a low-capacitance data ESD footprint near J1/J2. It is DNP until leakage,
-  clamping and coexistence with the 3.3 V bus are reviewed.
+- v0.2 intentionally has no unvalidated data-ESD or rail-TVS footprint. Add
+  protection only in a later revision after leakage, clamping, hot-plug and
+  1 Mbps waveform measurements select exact parts.
 
 The MCU controls direction in firmware. This is allowed for the ID200 board;
 the separate host HAT remains constrained by the current runtime, which exposes
@@ -84,13 +85,14 @@ no direction GPIO.
 
 ### Power
 
-- Bench v0.1 is an end node. Populate J1 only; J2, D1 and D2 are DNP. Do not
-  use the narrow board traces to pass servo current to a downstream device.
+- Bench v0.2 is an end node with J1 only. D1, D2 and J2 do not exist in its
+  schematic, PCB, BOM or CPL. Do not use the board to pass servo current to a
+  downstream device.
 - The board operating input is the retail XL330 rail, 3.7–6.0 V, with 5.0 V
   recommended by ROBOTIS. It must not be connected to an unregulated 2S pack.
 - U4 input: 1 µF X7R plus 10 µF local bulk; output: 4.7 µF X7R plus 100 nF.
-- Tie U4 `ON/OFF` to DXL_VDD. A power TVS footprint is DNP until rail transient
-  measurements select its standoff and clamp energy.
+- Tie U4 `ON/OFF` to DXL_VDD. A future power TVS must not be added until rail
+  transient measurements select its standoff and clamp energy.
 - Target board current is below 25 mA. Verify at 3.7 V and 6.0 V across cold,
   room and warm conditions; 3V3 must remain in both MCU and IMU limits.
 - U1 follows ST's one 100 nF plus one 4.7 µF supply scheme; VREF+ receives
@@ -114,11 +116,12 @@ no direction GPIO.
 
 All unused GPIOs remain unconnected in the schematic and are configured as
 analog inputs in firmware. VBAT is tied to 3V3 because v0 has no backup supply.
-Bench v0.1 uses the STM32 HSI16 oscillator. At room temperature the datasheet
-specifies 15.88–16.08 MHz at 3.0 V, while temperature and voltage add further
-drift. Firmware must measure UART timing at 3.7/5.0/6.0 V and tune/calibrate or
-reject the board if the 1 Mbps error budget is not met; visual UART success is
-not sufficient.
+Bench v0.2 uses the STM32 HSI16 oscillator and USART1 automatic baud-rate
+detection. Configure `ABRMOD=00` so the first start bit in the Dynamixel
+`0xFF 0xFF 0xFD 0x00` header updates BRR before any reply. Firmware must fail
+closed on `ABRE`, missing `ABRF`, framing error or timeout; it must never
+transmit with an unvalidated BRR. Scope verification across 3.7/5.0/6.0 V and
+the intended temperature range remains a hardware acceptance gate.
 
 ### IMU mode and mounting
 
@@ -149,12 +152,18 @@ not sufficient.
 7. Unit-test packet CRC, malformed packets, address/length bounds, fp16 packing,
    gyro endianness and timeout behavior before hardware bring-up.
 
+The portable Protocol 2.0 and Sync Read core is in
+[`../../firmware/imu_to_dxl_v0_2/`](../../firmware/imu_to_dxl_v0_2/). Its host
+tests cover CRC, malformed and wrong-range packets, ID selection, later-slot
+timing and Status Packet stuffing. STM32 startup/DMA glue and IMU acquisition
+remain hardware-dependent work.
+
 ## Verification gates
 
 Fabrication is split into two scopes so missing robot measurements do not block
 electrical learning:
 
-- **Bench prototype v0.1:** may be ordered using the archived manufacturing
+- **Bench prototype v0.2:** may be ordered using the current manufacturing
   package. It has no mounting holes, is not a servo-power pass-through and is
   not approved for installation in the robot.
 - **Robot-fit release:** remains blocked until the trunk envelope, mounting
@@ -166,7 +175,7 @@ can touch the full robot bus:
 
 1. Independent pin-number and footprint audit against every manufacturer
    datasheet and the JLC library objects.
-2. Unpowered continuity and DNP inspection, including the J3 solder-mask risk.
+2. Unpowered continuity, shorts and component-orientation inspection.
 3. One-servo bus test at 1 Mbps with TX-enable timing, idle voltage, overshoot,
    ringing, measured UART bit timing and packet-error captures.
 4. 3.7 V / 5.0 V / 6.0 V input tests, brownout and hot-plug tests using a
@@ -179,32 +188,34 @@ can touch the full robot bus:
 
 The private JLCEDA project `Microduck-imu_to_dxl-prototype` contains schematic
 page `c54e91c5cd2c5ac7` and PCB `7dfe558c7d961755` in project
-`643d2ed0f25f403394217692a93e032c`. The v0.1 PCB is 45.009 x 24.994 mm,
+`643d2ed0f25f403394217692a93e032c`. The v0.2 PCB is 45.009 x 24.994 mm,
 2-layer, 1.6 mm FR-4 with 1 oz copper and no mounting holes. A fresh PCB DRC
-completed 124 checks with zero issues at 2026-09-01 22:39:30. The captured
+completed 124 checks with zero issues at 2026-09-02 12:54:10; the schematic
+check had zero fatal/error/warning items at 2026-09-02 12:55:20. The captured
 schematic is available as
 [`imu_to_dxl_v0_schematic.png`](imu_to_dxl_v0_schematic.png).
 
 The dated Gerber, JLCEDA BOM and CPL exports are archived in
-[`manufacturing/`](manufacturing/). JLC online DFM task `DFMP2609010916`
+[`manufacturing/`](manufacturing/). JLC online DFM task `DFMP2609020362`
 parsed the board as 2 layers and 4.5 x 2.5 cm, with 0.24 mm minimum line width,
-0.20 mm minimum spacing, 0.30 mm minimum drill and 0.15 mm minimum annular
-ring. It reported two 1.85 mm through-hole-to-SMD clearance red items around
-J1/J2 and one 0.05 mm solder-mask-opening-to-trace red item near J3. These are
-accepted only for the bench build with J2/D1/D2 DNP, J1 hand soldering,
-production-file review and post-assembly microscope inspection. They are not
-accepted as a final robot-fit release.
+0.10 mm minimum spacing, 0.30 mm minimum drill and 0.15 mm minimum annular
+ring. Critical copper, solder-mask-opening, drill, annular-ring and PTH-to-SMD
+red findings are zero. The remaining red findings concern reference
+silkscreen clearance/width and may be clipped by fabrication; they do not waive
+electrical inspection. The exported Gerber contains 38 top and 4 bottom copper
+areas, confirming that both ground pours are in the manufacturing artifact.
 
 The JLC web order checker accepts the Gerber and shows a five-board quote. On
-2026-09-01 the web-order price was CNY 40; the DFM estimator showed CNY 20 and
-an unreconciled SMT estimate of CNY 211.81. Prices and stock are volatile.
-Final submission/payment remains a user action after checking shipping, tax,
-DNP reconciliation and the generated production preview.
+2026-09-02 the DFM estimator showed CNY 20 for PCB and CNY 211.47 for SMT.
+Prices and stock are volatile. Final submission/payment remains a user action
+after checking shipping, tax, finish, optional fees and the generated
+production preview.
 
-One JLC library item remains an explicit audit item: U4 library pin 3 is
-displayed as `ON/OFF#`, while the TI datasheet defines the enable behavior. It
-is intentionally tied to DXL_VDD; verify pin number and active level against
-the exact orderable revision before power-up.
+U4's JLC symbol displays pin 3 as `ON/OFF#`, but the TI LP2985 datasheet defines
+pin 3 as an active-high enable and explicitly instructs tying it to VIN when
+shutdown is not used. The v0.2 connection from pin 3 to DXL_VDD therefore
+matches the manufacturer requirement; the trailing `#` is treated as a library
+label defect, not an unresolved electrical inversion.
 
 ## Primary sources
 
@@ -215,5 +226,6 @@ the exact orderable revision before power-up.
 - LSM6DSV16X product and datasheet: <https://www.st.com/en/mems-and-sensors/lsm6dsv16x.html>
 - ST sensor-fusion example: <https://github.com/STMicroelectronics/STMems_Standard_C_drivers/blob/master/lsm6dsv16x_STdC/examples/lsm6dsv16x_sensor_fusion.c>
 - STM32G030 datasheet: <https://www.st.com/resource/en/datasheet/stm32g030c6.pdf>
+- STM32 USART automatic baud-rate detection: <https://www.st.com/resource/en/application_note/an4908-getting-started-with-usart-automatic-baud-rater-detection-for-stm32-mcus-stmicroelectronics.pdf>
 - SN74LVC2G241 datasheet: <https://www.ti.com/lit/ds/symlink/sn74lvc2g241.pdf>
 - LP2985 datasheet: <https://www.ti.com/lit/ds/symlink/lp2985.pdf>

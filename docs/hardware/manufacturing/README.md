@@ -1,59 +1,79 @@
-# `imu_to_dxl` bench prototype v0.1 manufacturing package
+# `imu_to_dxl` bench prototype v0.2 manufacturing package
 
-This directory contains the dated files exported from the private JLCEDA
-project `Microduck-imu_to_dxl-prototype` on 2026-09-01. It is an order package
-for a bench/end-node prototype, not evidence that the board fits the final
-robot enclosure.
+This directory contains the production files exported from the private JLCEDA
+project `Microduck-imu_to_dxl-prototype` on 2026-09-02. The v0.2 package is
+ready for a five-board bench/end-node prototype order. It is not evidence that
+the board fits the final robot enclosure.
 
-## Order inputs
+## Current order inputs
 
-- `imu_to_dxl_v0_1_gerber.zip`: copper, solder mask, silkscreen, outline and
-  drill files; upload this for bare-PCB fabrication.
-- `imu_to_dxl_v0_1_bom_jlceda.xlsx`: unmodified JLCEDA BOM export. It includes
-  D1, D2 and J2 for traceability even though all three are DNP for v0.1.
-- `imu_to_dxl_v0_1_cpl_jlceda.xlsx`: unmodified JLCEDA pick-and-place export.
+- `imu_to_dxl_v0_2_gerber.zip`: upload this for bare-PCB fabrication.
+- `imu_to_dxl_v0_2_bom_jlceda.xlsx`: upload this for SMT assembly.
+- `imu_to_dxl_v0_2_cpl_jlceda.xlsx`: upload this as the component placement
+  file.
 
-## Mandatory order settings
+The v0.2 BOM has 12 production groups and the CPL has 22 component rows. D1,
+D2 and J2 were removed from the schematic, PCB, BOM and CPL; there is no manual
+DNP reconciliation. J1 is the one through-hole row (`SMD=No`), leaving 21 SMT
+placements. Confirm that J1 is not machine-placed and solder it after SMT.
+
+The `imu_to_dxl_v0_1_*` files are retained only as a superseded audit record.
+Do not upload them for a new order.
+
+## Order settings
 
 - FR-4, 2 layers, 1.6 mm, 1 oz outer copper, green solder mask, white
   silkscreen, 45.0 x 25.0 mm, quantity 5.
-- J1 is the only populated bus connector and is hand-soldered after SMT.
-- Do not populate D1, D2 or J2. In the SMT component-confirmation page, mark
-  all three designators `DNP` before accepting the placement preview.
-- J2 is not a servo-power pass-through. The board is an end node and only
-  draws its own approximately 25 mA from J1.
-- R4 and R5 start at 0 ohm. Do not substitute active parts without a schematic
-  review.
+- J1 is the only bus connector. This board is an end node; do not route servo
+  power through it or add a downstream connector without a new layout review.
+- R4 and R5 are 0 ohm in this revision. Do not substitute them without a
+  one-servo oscilloscope capture and schematic review.
+- Select SMT assembly for the 21 `SMD=Yes` placements. J1 must be excluded from
+  machine placement and hand-soldered afterward.
+- A stencil is not required for the assembled-board order unless separate
+  manual rework is planned.
+- Use manual production-file confirmation. Two confirmation passes are
+  preferred for this first electrical prototype, although the second pass is
+  a paid checkout option.
+- Review the default finish and quality-indemnity options before payment. A
+  lead-free finish is preferred for handling, but price and process choices
+  remain checkout decisions.
 
-## Verified checks and remaining warnings
+## Verification evidence
 
-- JLCEDA PCB DRC: 0 errors, 124 checks, 2026-09-01 22:39:30.
-- JLC online DFM task: `DFMP2609010916`; Gerber parsed as 2 layers,
-  4.5 x 2.5 cm, minimum line width 0.24 mm, minimum clearance 0.20 mm,
-  minimum drill 0.30 mm and minimum annular ring 0.15 mm.
-- Online DFM reports two 1.85 mm through-hole-to-SMD clearance red items around
-  the connector region. J1 is hand-soldered and J2 is DNP; inspect this region
-  after assembly.
-- Online DFM reports one 0.05 mm solder-mask-opening-to-trace red item near J3.
-  Require production-file review and AOI/microscope inspection; quarantine a
-  board if solder or exposed copper bridges adjacent J3 nets.
-- Silkscreen proximity/width findings may be clipped by fabrication and are
-  not electrical acceptance evidence.
+- JLCEDA schematic check: 0 fatal, 0 error, 0 warning, 18 informational empty
+  `Value` notices; 2026-09-02 12:55:20.
+- JLCEDA PCB DRC: `All (0)`, 124 checks; 2026-09-02 12:54:10.
+- The Gerber contains 38 top-layer and 4 bottom-layer copper areas. Ground
+  pours are therefore present in the production export, not merely in the
+  editor view.
+- JLC online DFM task `DFMP2609020362` parsed the board as 2 layers,
+  4.5 x 2.5 cm, minimum line width 0.24 mm, minimum spacing 0.10 mm, minimum
+  drill 0.30 mm and minimum annular ring 0.15 mm.
+- Critical DFM red counts are zero for trace spacing, pad-on-hole,
+  trace-to-edge, dangling traces, PTH-to-line, annular ring, PTH-to-SMD,
+  via-to-pad and exposed copper near solder-mask openings.
+- The remaining red findings are silkscreen-to-pad/hole clearance and three
+  silkscreen-width items. Fabrication may clip that reference silkscreen; it is
+  not copper, mask, drill or connectivity acceptance evidence.
+- The JLC order checker accepted the v0.2 Gerber and populated the board
+  dimensions and layer stack without a file error.
 
-The JLC web quote observed on 2026-09-01 was CNY 40 for five bare boards in the
-web order flow (the DFM estimator showed CNY 20) and CNY 211.81 for SMT before
-DNP reconciliation. Prices, stock and lead time are snapshots and must be
-rechecked at checkout.
+The 2026-09-02 estimator snapshot was CNY 20 for PCB and CNY 211.47 for SMT,
+with estimated one-day PCB and two-day SMT production. The order page also
+showed optional fees. Prices, stock, shipping and lead time must be rechecked
+at checkout.
 
 ## File integrity
 
-Run `shasum -a 256 imu_to_dxl_v0_1_*` in this directory before uploading. The
-2026-09-01 export hashes are:
+Run `shasum -a 256 imu_to_dxl_v0_2_*` in this directory before uploading. The
+current export hashes are:
 
 ```text
-33c39e54cb25dc6e912cd03eeb405813d8fc6825139a09b2733d8e8aefad1bc7  imu_to_dxl_v0_1_bom_jlceda.xlsx
-58a26889deb36d4438ff79711d618a2cb0b8be750c618c561e1a1fe5a2d8500f  imu_to_dxl_v0_1_cpl_jlceda.xlsx
-8fee6a12faf76bbeaf4d83d3b3e80c6f33418128ce2b5a7c9f4a1a8782e4b619  imu_to_dxl_v0_1_gerber.zip
+f97b23ee7591972f90a40496acf245c9bd82b9956d7d0b4db393def2ceedb60f  imu_to_dxl_v0_2_bom_jlceda.xlsx
+de717a241c9407b4b0932f892467e573b482d1936aee77b8de7e62025f64f090  imu_to_dxl_v0_2_cpl_jlceda.xlsx
+76a9de183a998e3e5e8aa8490abc283e733a0f624145d37fb3a87c1ff9495d00  imu_to_dxl_v0_2_gerber.zip
 ```
 
-Do not upload a locally edited BOM/CPL under the original export names.
+Do not modify a BOM/CPL while keeping these filenames and hashes. Any design
+or placement change requires a new revision and a fresh DRC/DFM run.

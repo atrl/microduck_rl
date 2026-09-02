@@ -185,11 +185,13 @@ DATA without a reviewed interface.
   act as a Dynamixel Protocol 2.0 slave at ID200 and serve the runtime's register
   block.
 
-The reviewed v0.1 replacement-board contract and board-level BOM are in
+The reviewed v0.2 replacement-board contract and board-level BOM are in
 [`imu_to_dxl_v0_design.md`](imu_to_dxl_v0_design.md) and
 [`imu_to_dxl_v0_bom.csv`](imu_to_dxl_v0_bom.csv). The 45 x 25 mm no-hole
 end-node bench board may be ordered from the hashed package in
-[`manufacturing/`](manufacturing/) with D1/D2/J2 DNP and J1 hand-soldered. It
+[`manufacturing/`](manufacturing/). D1, D2 and J2 are absent from v0.2, and J1
+is hand-soldered after SMT. Use a passive splitter/Y harness for the one-servo
+test because this board is not a servo-power pass-through. It
 must not be installed in the robot until the measured outline, mounting holes,
 sensor-axis orientation, independent review, and one-servo power/bus gates in
 that document pass.

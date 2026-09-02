@@ -1,6 +1,6 @@
-# `imu_to_dxl` v0 completion and bring-up guide
+# `imu_to_dxl` v0.2 completion and bring-up guide
 
-This guide starts from the JLCEDA v0.1 bench-prototype manufacturing package
+This guide starts from the JLCEDA v0.2 bench-prototype manufacturing package
 and ends at the full sixteen-device timing gate. The dated package may be used
 to order bench boards, but it does not authorize robot installation or robot
 power. Every STOP below requires the named evidence.
@@ -18,8 +18,9 @@ Before converting the schematic to PCB:
    `trunk = [+raw_z, +raw_y, -raw_x]` with its current default mount.
 5. Independently compare every active part's symbol pin numbers and footprint
    pads with its manufacturer datasheet.
-6. Resolve the U4 enable-label audit item recorded in
-   [`imu_to_dxl_v0_design.md`](imu_to_dxl_v0_design.md).
+6. Preserve the reviewed U4 pin-3 connection to DXL_VDD. TI defines this pin as
+   active-high and recommends tying it to VIN when shutdown is unused, despite
+   the JLC symbol's misleading trailing `#`.
 
 **STOP I-01:** these measurements block only the robot-fit release. The 45 x
 25 mm no-hole end-node board may be ordered for bench electrical validation.
@@ -29,9 +30,10 @@ Before converting the schematic to PCB:
 Use a two-layer prototype first. Four layers are not justified until measured
 signal or EMI evidence requires them.
 
-1. Place J1/J2 at opposite short edges; keep pins and silk polarity identical.
-   On bench v0.1 populate J1 only and mark J2 `DNP / NO SERVO POWER`.
-2. Mark D1/D2 DNP in assembly data and reconcile those flags on the SMT order.
+1. Place J1 at the board edge, keep pin 1/2/3 polarity explicit and preserve
+   cable-removal clearance. v0.2 has no J2 and is not a bus pass-through.
+2. Keep D1, D2 and J2 absent from the schematic, PCB, BOM and CPL. Protection
+   parts require measured bus and hot-plug evidence before a later revision.
 3. Place U3 between the connector data node and U1. Keep DXL_DATA compact and
    keep R4/R5 accessible for rework.
 4. Place U4 and its input/output capacitors as a tight local loop. DXL_VDD is a
@@ -42,19 +44,20 @@ signal or EMI evidence requires them.
    silkscreen.
 6. Place U2's two 100 nF capacitors at pins 5 and 8. Keep the ground return
    short and do not route the 1 Mbps bus directly beneath the sensor.
-7. Leave U1 PF0/PF1 unconnected on bench v0.1; firmware uses HSI16 and must
-   measure/tune 1 Mbps timing during bring-up.
+7. Leave U1 PF0/PF1 unconnected. Firmware uses HSI16 plus USART automatic
+   baud-rate detection and must fail closed unless `ABRF` is set without
+   `ABRE`; confirm actual timing during bring-up.
 8. Keep the SWD header and reset node reachable after assembly. Provide test
    points for 3V3, GND, DXL_DATA, MCU_TX, MCU_RX and TX_ENABLE.
 9. Use a ground pour on both layers with frequent stitching. Keep the bus trace
    away from crystal and IMU SPI clocks where practical.
-10. Add fabrication notes: D1/D2 DNP, R4/R5 initially 0 Ω, do not substitute
-    active parts without schematic re-review.
+10. Add fabrication notes: R4/R5 initially 0 Ω; J1 hand-soldered after SMT;
+    do not substitute active parts without schematic re-review.
 
 Run PCB DRC and online DFM with the actual manufacturer's clearance rules. The
-v0.1 archived run has zero JLCEDA DRC issues; its three DFM red findings are
-recorded in [`manufacturing/README.md`](manufacturing/README.md) and require
-production-file plus microscope inspection.
+v0.2 has zero JLCEDA DRC issues and zero critical electrical DFM red findings.
+The remaining silkscreen-only findings are recorded in
+[`manufacturing/README.md`](manufacturing/README.md).
 
 **STOP I-02:** bench fabrication requires the hashed Gerber/BOM/CPL package,
 zero unexplained JLCEDA DRC errors and documented disposition of every DFM red
@@ -70,8 +73,7 @@ Order five boards after the bench scope of STOP I-02:
 - board C: untouched comparison/spare;
 - boards D/E: assembly-yield and firmware-development spares.
 
-Do not populate D1, D2 or J2. Hand-solder J1 after SMT. Populate R4/R5 with
-0 Ω. Use the
+Hand-solder J1 after SMT and populate R4/R5 with 0 Ω. Use the
 exact active-part revisions in [`imu_to_dxl_v0_bom.csv`](imu_to_dxl_v0_bom.csv)
 unless a reviewed change record approves a substitute.
 
@@ -87,8 +89,8 @@ licenses and commit SHAs.
 
 ### F0: board minimum
 
-- HSI16 startup, measured UART baud error and a bounded calibration/reject
-  decision across the tested voltage/temperature range;
+- HSI16 startup and USART1 `ABRMOD=00` automatic baud detection, with a
+  no-response path for `ABRE`, missing `ABRF`, framing errors and timeouts;
 - SWD flash/debug and NRST;
 - watchdog;
 - a bounded fault status retained for debugger inspection;
@@ -114,6 +116,11 @@ licenses and commit SHAs.
 - TX_ENABLE defaults low and is asserted only for the response interval;
 - bus idle and collision timeouts always return U3 to receive mode.
 
+The allocation-free Protocol 2.0/Sync Read core and portable tests are already
+in [`../../firmware/imu_to_dxl_v0_2/`](../../firmware/imu_to_dxl_v0_2/).
+STM32 DMA/IRQ integration, Ping/Read dispatch and oscilloscope timing remain
+required before F2 is complete.
+
 ### F3: diagnostics
 
 Keep registers 136–143 reserved until their public contract is available. Put
@@ -132,10 +139,10 @@ For each serialized board:
 2. Inspect LGA/LQFP bridges, polarity and connector pin order.
 3. Measure resistance from DXL_VDD to GND and 3V3 to GND before power.
 4. Verify continuity for every net in the reviewed schematic.
-5. Verify D1/D2/J2 are not populated and R4/R5 are 0 Ω.
+5. Verify the assembly matches the v0.2 BOM/CPL and R4/R5 are 0 Ω.
 6. Verify J1 pin order and confirm no unintended servo-current path exists.
-7. Microscope-inspect J3 for exposed-trace solder bridges and the J1/J2 region
-   for the documented DFM spacing findings.
+7. Microscope-inspect J3, J1 and all fine-pitch pins for solder bridges; do not
+   treat clipped reference silkscreen as an electrical defect.
 
 **STOP I-03:** any unexpected short, open, swapped connector pin or unreviewed
 substitution quarantines the board.
@@ -172,8 +179,10 @@ acceptance record.
 
 ## 8. One-servo bus gate
 
-Connect J1 to a U2D2 or reviewed host interface and J2 to one XL330. Power the
-board and servo from the regulated rated-voltage rail with torque disabled.
+Connect J1 and one XL330 to a passive three-way Dynamixel splitter/Y harness,
+with the U2D2 or reviewed host interface on the third branch. Power the board
+and servo from the regulated rated-voltage rail with torque disabled. Do not
+modify v0.2 into a power pass-through.
 
 1. Verify only the servo ID and ID200 answer Ping.
 2. Send Read and Sync Read for ID200 address 124 length 12.

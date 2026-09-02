@@ -35,11 +35,12 @@ or fabricated safely without a measurement or prototype test.
 - [`imu_to_dxl_v0_design.md`](imu_to_dxl_v0_design.md): source-backed ID200
   replacement-board contract, schematic decisions, and verification gates.
 - [`imu_to_dxl_v0_bom.csv`](imu_to_dxl_v0_bom.csv): board-level prototype BOM
-  with JLC/LCSC identifiers and DNP decisions.
+  with the exact v0.2 JLC/LCSC production identifiers.
 - [`imu_to_dxl_v0_bringup.md`](imu_to_dxl_v0_bringup.md): PCB, firmware,
   inspection, power, one-servo, and full-bus completion gates.
-- [`manufacturing/`](manufacturing/): hashed v0.1 Gerber, JLCEDA BOM/CPL and
-  the mandatory DNP/DFM order checklist.
+- [`manufacturing/`](manufacturing/): hashed v0.2 Gerber and JLCEDA BOM/CPL,
+  verified DRC/DFM evidence, and checkout settings. Superseded v0.1 files are
+  retained only for audit history.
 - [`../robot_assets.md`](../robot_assets.md): original simulation-asset package.
 
 ## Design target
@@ -60,9 +61,10 @@ retraining.
 - Power distribution: design required; **do not connect a 2S pack directly to
   retail XL330 servos from this documentation**.
 - Robot HAT: interface contract available; replacement design still required.
-- `imu_to_dxl`: bench v0.1 PCB is orderable from the archived package after
-  D1/D2/J2 DNP reconciliation; firmware, electrical bring-up and final robot
-  mechanical fit remain open.
+- `imu_to_dxl`: bench v0.2 PCB/SMT inputs are orderable from the frozen package;
+  D1/D2/J2 are absent, critical electrical DFM red counts are zero, and the
+  host-tested Sync Read protocol core is included. STM32/IMU integration,
+  electrical bring-up and final robot mechanical fit remain open.
 - Full assembly: blocked until the P0 gates in `build_plan.md` pass.
 
 ## Primary sources
