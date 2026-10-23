@@ -177,6 +177,7 @@ def main():
                     send()
                     active = False
                     guard.reset()
+                    receiver.reset_input_buffer()  # discard queued pre-loss commands
                 # If host was starved, never replay a backlog of old actions.
                 if receiver.in_waiting > 512:
                     receiver.reset_input_buffer()
