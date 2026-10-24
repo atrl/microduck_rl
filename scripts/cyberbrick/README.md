@@ -4,6 +4,35 @@ Four-axis remote input bridge for the stock **CyberBrick X12 transmitter + X11 r
 
 **Compatibility:** This is an input adapter, not a Feetech HD-1910/URT-2 motor driver. Only the Pollen `robotd/netpadd` protocol is targeted. The Luwu XGO-Duck / Arduino UNO Q and custom Feetech TaishanPi runtimes need a separate adapter to their real velocity/action API. Upstream has 14 XL330 joints whereas your XGO build has 15 HD-1910 servos; do **not** assume compatible gait, calibration, IMU frames, joint order, or safety.
 
+## Compact UART installation (recommended when USB ports are occupied)
+
+The X11's **D1 WS2812 signal** is A11 **GPIO21 = TX**, and D2 signal is **GPIO20 = RX**. Community examples reuse these as hardware UART; this PR's `receiver_main.py` now transmits the same receiver frames to UART1 **and** prints them on USB CDC for debugging. No USB host port is needed during operation.
+
+| X11/Core A11 | TaishanPi RK3566 | Notes |
+| --- | --- | --- |
+| D1 **signal** (GPIO21/TX) | 40-pin **physical pin 10**, UART3_RX_M1 | **Use level conversion:** TaishanPi docs rate GPIO input maximum **3.0 V**, ESP32-C3 TX may output **3.3 V** |
+| Receiver ground (DC power negative / shared GND) | physical **pin 6** GND (or any ground) | Mandatory common ground |
+| X11 **XH2.54 DC supply input** | protected raw battery branch | X11 specified for **7.4–12.6 V**; a 2S Li-ion/LiPo is 8.4 V full and may fall below 7.4 V as it discharges. Verify actual rail and undervoltage behavior first. |
+| D2 signal (GPIO20/RX) | Not connected | One-way control bridge; no UART return is needed |
+
+**Voltage divider example (one-way):** X11 D1 signal → **1 kΩ series** → TaishanPi pin 10; a **6.8 kΩ resistor** from TaishanPi pin 10 to GND. With 3.3 V TX this yields about **2.88 V** at RX. Share grounds. Check actual IO rail with a multimeter and follow the applicable TaishanPi revision's electrical limits before connecting. Do not apply the X11 battery voltage to any TaishanPi GPIO. **DO NOT** use the X11 D1 3-pin connector's supply pin as a UART signal. Confirm its signal/GND pins against the PCB silkscreen and schematic before crimping.
+
+The TaishanPi user UART3 is `/dev/ttyS3` when enabled by the board's pinmux/device tree (not the debug UART2). **Pin 8 is UART3_TX; pin 10 is UART3_RX.** Make sure your custom HAT does not already allocate these pins, and confirm the Linux UART node exists. If the HAT uses pin 10, use another free UART with device-tree setup instead of joining two outputs.
+
+```bash
+# test with the robot physically supported and all motors disabled
+ls -l /dev/ttyS3
+python3 scripts/cyberbrick/bridge.py --port /dev/ttyS3 --dry-run
+
+# only when the Pollen MicroDuck netpadd runtime is installed
+# and you have verified safe neutral and disconnect behavior
+python3 scripts/cyberbrick/bridge.py --port /dev/ttyS3 --target 127.0.0.1
+```
+
+The original USB-CDC testing path remains available (`--port /dev/ttyACM0`).
+
+**References:** [Bambu forum pin mapping](https://forum.bambulab.com/t/extending-the-of-inputs-and-outputs-of-transmitter-and-receiver/180026) · [TaishanPi UART3 header pinout](https://wiki.lckfb.com/zh-hans/linux-docs/linux-driver-related-subsystems/gpio-subsystem/concepts-to_configure_gpio.html) · [TaishanPi GPIO voltage caution](https://wiki.lckfb.com/zh-hans/tspi-rk3566/documentation/io-allocation-table.html)
+
 ## Preparation
 
 1. Pair your X12 transmitter and X11 receiver in the CyberBrick tooling. Check that receiver firmware provides the official `rc_module` API.
