@@ -12,10 +12,11 @@ import time
 from machine import Pin, UART
 import rc_module
 
-# Uses a hardware UART: USB remains free for development/debugging.
-uart = UART(1, baudrate=115200, tx=Pin(21), rx=Pin(20))
 if rc_module.rc_slave_init() is False:
     raise RuntimeError("CyberBrick receiver initialization failed")
+# Configure UART after the RC subsystem, so its pinmux takes precedence.
+# USB remains free for development/debugging.
+uart = UART(1, baudrate=115200, tx=Pin(21), rx=Pin(20))
 
 print("CBREADY")
 while True:
